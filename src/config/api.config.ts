@@ -58,7 +58,9 @@ apiClient.interceptors.response.use(
             if (!refresh) {
                 isRefreshing = false;
                 processQueue(null, null);
-                window.location.href = "/login";
+                authService.logoutLocal();
+                // Use replace to prevent back button issues
+                window.location.replace("/login");
                 return Promise.reject(error);
             }
 
@@ -70,7 +72,8 @@ apiClient.interceptors.response.use(
             } catch (err) {
                 processQueue(err, null);
                 authService.logoutLocal();
-                window.location.href = "/login";
+                // Use replace to prevent back button issues
+                window.location.replace("/login");
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;

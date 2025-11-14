@@ -28,26 +28,38 @@ export const CampaignsOverview: React.FC<CampaignsOverviewProps> = ({
                                                                     }) => {
     return (
         <Paper
+            elevation={3}
             sx={{
-                background: 'linear-gradient(135deg, #234558 0%, #1B3A4B 100%)',
-                border: '1px solid rgba(253, 185, 19, 0.2)',
-                borderRadius: 3,
+                background: 'linear-gradient(135deg, rgba(26, 41, 66, 0.6) 0%, rgba(26, 41, 66, 0.9) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(253, 185, 19, 0.15)',
+                borderRadius: 4,
                 overflow: 'hidden',
             }}
         >
-            <Box sx={{p: 3, borderBottom: '1px solid rgba(255, 255, 255, 0.1)'}}>
+            <Box sx={{p: 3.5, borderBottom: '1px solid rgba(255, 255, 255, 0.08)'}}>
                 <Typography
-                    variant="h6"
+                    variant="h5"
                     sx={{
                         color: '#FFFFFF',
-                        fontWeight: 600,
+                        fontWeight: 700,
+                        letterSpacing: '-0.01em',
                     }}
                 >
                     Active Campaigns
                 </Typography>
+                <Typography
+                    variant="body2"
+                    sx={{
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        mt: 0.5,
+                    }}
+                >
+                    Ongoing phishing simulations
+                </Typography>
             </Box>
-            <Box sx={{p: 3}}>
-                <Grid container spacing={2}>
+            <Box sx={{p: 3.5}}>
+                <Grid container spacing={2.5}>
                     {campaigns.map((campaign) => {
                         const statusConfig = getStatusConfig(campaign.status);
                         const clickRate =
@@ -59,14 +71,15 @@ export const CampaignsOverview: React.FC<CampaignsOverviewProps> = ({
                             <Grid size={{ xs: 12 }} key={campaign.id}>
                                 <Box
                                     sx={{
-                                        p: 2.5,
-                                        borderRadius: 2,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                                        transition: 'all 0.2s',
+                                        p: 3,
+                                        borderRadius: 3,
+                                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                                        border: '1px solid rgba(255, 255, 255, 0.06)',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                         '&:hover': {
-                                            backgroundColor: 'rgba(253, 185, 19, 0.05)',
-                                            borderColor: '#FDB913',
+                                            backgroundColor: 'rgba(253, 185, 19, 0.08)',
+                                            borderColor: 'rgba(253, 185, 19, 0.3)',
+                                            transform: 'translateX(4px)',
                                         },
                                     }}
                                 >

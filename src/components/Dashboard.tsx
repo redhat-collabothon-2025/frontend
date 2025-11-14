@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {
     Alert,
     AppBar,
@@ -50,6 +51,7 @@ const HexagonLogo: React.FC<{ size?: number }> = ({size = 40}) => (
 );
 
 export const Dashboard: React.FC = () => {
+    const navigate = useNavigate();
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [users, setUsers] = useState<User[]>([]);
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -105,14 +107,19 @@ export const Dashboard: React.FC = () => {
     };
 
     const handleLogout = async () => {
+        handleMenuClose();
         try {
             const refreshToken = authService.getRefreshToken();
             if (refreshToken) {
                 await authService.logout(refreshToken);
             }
-            window.location.href = '/login';
+            authService.logoutLocal();
+            navigate('/login', { replace: true });
         } catch (err) {
             console.error('Logout error:', err);
+            // Even if API call fails, clear local state and navigate
+            authService.logoutLocal();
+            navigate('/login', { replace: true });
         }
     };
 
@@ -124,10 +131,15 @@ export const Dashboard: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #1B3A4B 0%, #0F2027 100%)',
+                    background: 'linear-gradient(135deg, #0A1929 0%, #1A2942 50%, #0F1E2E 100%)',
                 }}
             >
-                <CircularProgress sx={{color: '#FDB913'}} size={60}/>
+                <Box sx={{ textAlign: 'center' }}>
+                    <CircularProgress sx={{color: '#FDB913'}} size={60} thickness={4}/>
+                    <Typography sx={{ mt: 2, color: 'rgba(255, 255, 255, 0.7)' }}>
+                        Loading dashboard...
+                    </Typography>
+                </Box>
             </Box>
         );
     }
@@ -136,16 +148,28 @@ export const Dashboard: React.FC = () => {
         <Box
             sx={{
                 minHeight: '100vh',
-                background: 'linear-gradient(135deg, #1B3A4B 0%, #0F2027 100%)',
+                background: 'linear-gradient(135deg, #0A1929 0%, #1A2942 50%, #0F1E2E 100%)',
+                position: 'relative',
+                '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '400px',
+                    background: 'radial-gradient(circle at top center, rgba(253, 185, 19, 0.08) 0%, transparent 70%)',
+                    pointerEvents: 'none',
+                },
             }}
         >
             <AppBar
                 position="sticky"
                 elevation={0}
                 sx={{
-                    backgroundColor: 'rgba(35, 69, 88, 0.95)',
-                    backdropFilter: 'blur(10px)',
-                    borderBottom: '1px solid rgba(253, 185, 19, 0.1)',
+                    backgroundColor: 'rgba(10, 25, 41, 0.8)',
+                    backdropFilter: 'blur(20px)',
+                    borderBottom: '1px solid rgba(253, 185, 19, 0.15)',
+                    zIndex: 1100,
                 }}
             >
                 <Toolbar>
@@ -181,20 +205,38 @@ export const Dashboard: React.FC = () => {
                         onClose={handleMenuClose}
                         PaperProps={{
                             sx: {
-                                mt: 1,
-                                backgroundColor: '#234558',
+                                mt: 1.5,
+                                backgroundColor: '#1A2942',
                                 border: '1px solid rgba(253, 185, 19, 0.2)',
+                                borderRadius: '12px',
+                                minWidth: '180px',
                             },
                         }}
+                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                     >
                         <MenuItem
                             onClick={handleLogout}
                             sx={{
                                 color: '#FFFFFF',
-                                '&:hover': {backgroundColor: 'rgba(253, 185, 19, 0.1)'},
+                                py: 1.5,
+                                px: 2,
+                                borderRadius: '8px',
+                                mx: 0.5,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(253, 185, 19, 0.1)',
+                                    '& .MuiSvgIcon-root': {
+                                        transform: 'translateX(-2px)',
+                                    },
+                                },
                             }}
                         >
-                            <LogoutIcon sx={{mr: 1, fontSize: 20, color: '#FDB913'}}/>
+                            <LogoutIcon sx={{
+                                mr: 1.5,
+                                fontSize: 20,
+                                color: '#FDB913',
+                                transition: 'transform 0.2s',
+                            }}/>
                             Logout
                         </MenuItem>
                     </Menu>
@@ -216,16 +258,29 @@ export const Dashboard: React.FC = () => {
                     </Alert>
                 )}
 
-                <Typography
-                    variant="h4"
-                    sx={{
-                        color: '#FFFFFF',
-                        fontWeight: 700,
-                        mb: 4,
-                    }}
-                >
-                    Overview
-                </Typography>
+                <Box sx={{ mb: 5 }}>
+                    <Typography
+                        variant="h3"
+                        sx={{
+                            color: '#FFFFFF',
+                            fontWeight: 800,
+                            mb: 1,
+                            background: 'linear-gradient(135deg, #FFFFFF 0%, #FDB913 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                        }}
+                    >
+                        Dashboard Overview
+                    </Typography>
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            color: 'rgba(255, 255, 255, 0.6)',
+                        }}
+                    >
+                        Monitor your security metrics and user activities
+                    </Typography>
+                </Box>
 
                 <Grid container spacing={3} sx={{mb: 4}}>
                     <Grid size={{xs: 12, sm: 6, md: 3}}>

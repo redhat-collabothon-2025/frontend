@@ -44,22 +44,35 @@ const getSeverityConfig = (severity: string) => {
 export const IncidentsList: React.FC<IncidentsListProps> = ({incidents}) => {
     return (
         <Paper
+            elevation={3}
             sx={{
-                background: 'linear-gradient(135deg, #234558 0%, #1B3A4B 100%)',
-                border: '1px solid rgba(253, 185, 19, 0.2)',
-                borderRadius: 3,
+                background: 'linear-gradient(135deg, rgba(26, 41, 66, 0.6) 0%, rgba(26, 41, 66, 0.9) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(253, 185, 19, 0.15)',
+                borderRadius: 4,
                 overflow: 'hidden',
+                height: '100%',
             }}
         >
-            <Box sx={{p: 3, borderBottom: '1px solid rgba(255, 255, 255, 0.1)'}}>
+            <Box sx={{p: 3.5, borderBottom: '1px solid rgba(255, 255, 255, 0.08)'}}>
                 <Typography
-                    variant="h6"
+                    variant="h5"
                     sx={{
                         color: '#FFFFFF',
-                        fontWeight: 600,
+                        fontWeight: 700,
+                        letterSpacing: '-0.01em',
                     }}
                 >
                     Recent Incidents
+                </Typography>
+                <Typography
+                    variant="body2"
+                    sx={{
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        mt: 0.5,
+                    }}
+                >
+                    Latest security alerts
                 </Typography>
             </Box>
             <List sx={{p: 0}}>
@@ -71,10 +84,12 @@ export const IncidentsList: React.FC<IncidentsListProps> = ({incidents}) => {
                         <React.Fragment key={incident.id}>
                             <ListItem
                                 sx={{
-                                    px: 3,
-                                    py: 2,
+                                    px: 3.5,
+                                    py: 2.5,
+                                    transition: 'background-color 0.2s',
+                                    cursor: 'pointer',
                                     '&:hover': {
-                                        backgroundColor: 'rgba(253, 185, 19, 0.05)',
+                                        backgroundColor: 'rgba(253, 185, 19, 0.08)',
                                     },
                                 }}
                             >

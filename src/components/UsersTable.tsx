@@ -34,22 +34,34 @@ const getRiskColor = (level: string) => {
 export const UsersTable: React.FC<UsersTableProps> = ({users}) => {
     return (
         <Paper
+            elevation={3}
             sx={{
-                background: 'linear-gradient(135deg, #234558 0%, #1B3A4B 100%)',
-                border: '1px solid rgba(253, 185, 19, 0.2)',
-                borderRadius: 3,
+                background: 'linear-gradient(135deg, rgba(26, 41, 66, 0.6) 0%, rgba(26, 41, 66, 0.9) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(253, 185, 19, 0.15)',
+                borderRadius: 4,
                 overflow: 'hidden',
             }}
         >
-            <Box sx={{p: 3, borderBottom: '1px solid rgba(255, 255, 255, 0.1)'}}>
+            <Box sx={{p: 3.5, borderBottom: '1px solid rgba(255, 255, 255, 0.08)'}}>
                 <Typography
-                    variant="h6"
+                    variant="h5"
                     sx={{
                         color: '#FFFFFF',
-                        fontWeight: 600,
+                        fontWeight: 700,
+                        letterSpacing: '-0.01em',
                     }}
                 >
                     High Risk Users
+                </Typography>
+                <Typography
+                    variant="body2"
+                    sx={{
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        mt: 0.5,
+                    }}
+                >
+                    Users requiring immediate attention
                 </Typography>
             </Box>
             <TableContainer>
@@ -74,8 +86,12 @@ export const UsersTable: React.FC<UsersTableProps> = ({users}) => {
                                 <TableRow
                                     key={user.id}
                                     sx={{
+                                        transition: 'background-color 0.2s',
                                         '&:hover': {
-                                            backgroundColor: 'rgba(253, 185, 19, 0.05)',
+                                            backgroundColor: 'rgba(253, 185, 19, 0.08)',
+                                        },
+                                        '&:last-child td': {
+                                            borderBottom: 'none',
                                         },
                                     }}
                                 >
