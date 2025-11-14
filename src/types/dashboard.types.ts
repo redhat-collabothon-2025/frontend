@@ -34,6 +34,13 @@ export interface RiskHistory {
     user: string;
 }
 
+export interface RiskHeatmap {
+    department: string;
+    week: string;
+    risk_score: number;
+    incident_count: number;
+}
+
 export interface DashboardStats {
     total_users: number;
     high_risk_users: number;

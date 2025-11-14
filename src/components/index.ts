@@ -3,3 +3,4 @@ export { default as Dashboard } from './Dashboard';
 export { default as UsersTable } from './UsersTable';
 export { default as IncidentsList } from './IncidentsList';
 export { default as CampaignsOverview } from './CampaignsOverview';
+export { default as HeatmapOverview } from './HeatmapOverview';

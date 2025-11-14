@@ -1,5 +1,5 @@
 import apiClient from '../config/api.config';
-import {Campaign, DashboardStats, Event, Incident, PaginatedResponse,} from '../types/dashboard.types';
+import {Campaign, DashboardStats, Event, Incident, PaginatedResponse, RiskHeatmap} from '../types/dashboard.types';
 import {User} from '../types/auth.types';
 
 export const dashboardService = {
@@ -62,6 +62,11 @@ export const dashboardService = {
 
     async getRiskTrend(): Promise<any> {
         const response = await apiClient.get('/api/analytics/risk-trend/');
+        return response.data;
+    },
+
+    async getRisksHeatmap(): Promise<RiskHeatmap[]> {
+        const response = await apiClient.get<RiskHeatmap[]>('/api/risks/heatmap');
         return response.data;
     },
 };

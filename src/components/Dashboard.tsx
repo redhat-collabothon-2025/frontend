@@ -27,9 +27,10 @@ import {IncidentsList} from './IncidentsList';
 import {CampaignsOverview} from './CampaignsOverview';
 import {dashboardService} from '../services/dashboard.service';
 import {authService} from '../services/auth.service';
-import {Campaign, DashboardStats, Incident} from '../types/dashboard.types';
+import {Campaign, DashboardStats, Incident, RiskHeatmap} from '../types/dashboard.types';
 import {User} from '../types/auth.types';
 import StatsCard from "./Statscard";
+import {HeatmapOverview} from './HeatmapOverview';
 
 
 const HexagonLogo: React.FC<{ size?: number }> = ({size = 40}) => (
@@ -56,6 +57,7 @@ export const Dashboard: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [incidents, setIncidents] = useState<Incident[]>([]);
+    const [risksHeatmap, setRisksHeatmap] = useState<RiskHeatmap[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>('');
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -69,12 +71,13 @@ export const Dashboard: React.FC = () => {
         setError('');
 
         try {
-            const [statsData, usersData, campaignsData, incidentsData] =
+            const [statsData, usersData, campaignsData, incidentsData, risksHeatmap] =
                 await Promise.all([
                     dashboardService.getStats(),
                     dashboardService.getUsers(),
                     dashboardService.getCampaigns(),
                     dashboardService.getIncidents(),
+                    dashboardService.getRisksHeatmap(),
                 ]);
             console.log({statsData, usersData, campaignsData, incidentsData});
             setStats(statsData);
@@ -90,6 +93,9 @@ export const Dashboard: React.FC = () => {
             );
 
             setIncidents(incidentsData.slice(0, 5));
+
+            setRisksHeatmap(risksHeatmap)
+
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to load dashboard data');
         } finally {
@@ -326,6 +332,11 @@ export const Dashboard: React.FC = () => {
                     </Grid>
                     <Grid size={{xs: 12, lg: 4}}>
                         <IncidentsList incidents={incidents}/>
+                    </Grid>
+                </Grid>
+                <Grid container spacing={3} sx={{mt: 4}}>
+                    <Grid size={{xs:6, lg:8, md: 3}} sx={{justifyContent: "center", alignItems: "center"}} >
+                        <HeatmapOverview data={risksHeatmap} />
                     </Grid>
                 </Grid>
             </Container>
