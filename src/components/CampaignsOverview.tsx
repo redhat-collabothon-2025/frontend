@@ -1,8 +1,11 @@
-import React from 'react';
-import {Box, Chip, Grid, LinearProgress, Paper, Typography,} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import {Box, IconButton, Chip, Dialog, DialogTitle, DialogContent, Grid, LinearProgress, Paper, Typography,} from '@mui/material';
 import {Campaign as CampaignIcon} from '@mui/icons-material';
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
 import {Campaign} from '../types/dashboard.types';
 import {format} from 'date-fns';
+import axios from "axios";
 
 interface CampaignsOverviewProps {
     campaigns: Campaign[];
@@ -26,6 +29,19 @@ const getStatusConfig = (status: string) => {
 export const CampaignsOverview: React.FC<CampaignsOverviewProps> = ({
                                                                         campaigns,
                                                                     }) => {
+    const [open, setOpen] = React.useState(false);
+    const [selectedCampaign, setSelectedCampaign] = React.useState<Campaign | null>(null);
+
+    const handleOpen = (campaign: Campaign) => {
+        setSelectedCampaign(campaign);
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        setSelectedCampaign(null);
+    };    
+
     return (
         <Paper
             elevation={3}
@@ -70,17 +86,21 @@ export const CampaignsOverview: React.FC<CampaignsOverviewProps> = ({
                         return (
                             <Grid size={{ xs: 12 }} key={campaign.id}>
                                 <Box
+                                    onClick={campaign.status === 'active' ? () => handleOpen(campaign) : undefined}
                                     sx={{
                                         p: 3,
                                         borderRadius: 3,
                                         backgroundColor: 'rgba(255, 255, 255, 0.02)',
                                         border: '1px solid rgba(255, 255, 255, 0.06)',
                                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(253, 185, 19, 0.08)',
-                                            borderColor: 'rgba(253, 185, 19, 0.3)',
-                                            transform: 'translateX(4px)',
-                                        },
+                                        cursor: campaign.status === 'active' ? 'pointer' : 'default',
+                                        '&:hover': campaign.status === 'active'
+                                            ? {
+                                                backgroundColor: 'rgba(253, 185, 19, 0.08)',
+                                                borderColor: 'rgba(253, 185, 19, 0.3)',
+                                                transform: 'translateX(4px)',
+                                            }
+                                            : {},
                                     }}
                                 >
                                     <Box
@@ -209,8 +229,121 @@ export const CampaignsOverview: React.FC<CampaignsOverviewProps> = ({
                     })}
                 </Grid>
             </Box>
+            <CampaignDetailsDialog 
+                open={open} 
+                onClose={handleClose} 
+                campaign={selectedCampaign} 
+            />
         </Paper>
     );
 };
+
+const CampaignDetailsDialog = ({
+    open,
+    onClose,
+    campaign,
+}: {
+    open: boolean;
+    onClose: () => void;
+    campaign: Campaign | null;
+}) => {
+    const [details, setDetails] = useState<any>(null);
+    const [stats, setStats] = useState<any>(null);
+
+    useEffect(() => {
+        if (!campaign || !open) return;
+
+        const fetchData = async () => {
+            try {
+                // Example GET requests (replace with your real API endpoints)
+                const detailsReq = axios.get(`/api/campaigns/${campaign.id}`);
+                const statsReq = axios.get(`/api/campaigns/${campaign.id}/analytics`);
+
+                const [detailsRes, statsRes] = await Promise.all([detailsReq, statsReq]);
+
+                setDetails(detailsRes.data);
+                setStats(statsRes.data);
+            } catch (error) {
+                console.error("Error fetching campaign data", error);
+            }
+        };
+
+        fetchData();
+    }, [campaign, open]);
+
+    const handleLaunch = async (campaign: Campaign) => {
+        try {
+            await axios.post(`/api/campaigns/${campaign.id}/launch`);
+            alert("Campaign launched!");
+        } catch (err) {
+            console.error(err);
+        }
+    };
+    
+    const handlePause = async (campaign: Campaign) => {
+        try {
+            await axios.post(`/api/campaigns/${campaign.id}/pause`);
+            alert("Campaign paused!");
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    return (
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+            {/* HEADER */}
+            <Box
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    p: 2,
+                    pb: 1,
+                    borderBottom: "1px solid rgba(255,255,255,0.1)",
+                }}
+            >
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    {campaign?.persona_name}
+                </Typography>
+
+                {/* ❌ Emoji Close Button */}
+                <IconButton onClick={onClose} sx={{ fontSize: "1.4rem" }}>
+                    ❌
+                </IconButton>
+            </Box>
+
+            {/* CONTENT */}
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, padding: 2 }}>
+            {/* LAUNCH BUTTON */}
+            {(campaign?.status === "paused" || campaign?.status === "draft") && (
+                <IconButton
+                    onClick={() => handleLaunch(campaign)}
+                    sx={{
+                        background: "rgba(34,197,94,0.15)",
+                        display: "flex",
+                        "&:hover": { background: "rgba(34,197,94,0.25)" },
+                    }}
+                >
+                    <PlayArrowIcon sx={{ color: "#22C55E" }} />
+                </IconButton>
+            )}
+    
+            {/* PAUSE BUTTON */}
+            {campaign?.status === "active" && (
+                <IconButton
+                    onClick={() => handlePause(campaign)}
+                    sx={{
+                        background: "rgba(239,68,68,0.15)",
+                        "&:hover": { background: "rgba(239,68,68,0.25)" },
+                    }}
+                >
+                    <PauseIcon sx={{ color: "#EF4444" }} />
+                </IconButton>
+            )}
+        </Box>
+        </Dialog>
+    );
+};
+
 
 export default CampaignsOverview;
