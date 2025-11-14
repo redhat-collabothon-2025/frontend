@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {authService} from '../services/auth.service';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://backend-white-hat.apps.cluster-xdhbp.xdhbp.sandbox1403.opentlc.com/';
 
 export const apiClient = axios.create({
     baseURL: API_BASE_URL,
