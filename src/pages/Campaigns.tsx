@@ -247,7 +247,7 @@ export default function Campaigns() {
               </Button>
             )}
             <Button
-              onClick={activeTab === 'campaigns' ? fetchCampaigns : fetchEvents}
+              onClick={() => activeTab === 'campaigns' ? fetchCampaigns() : fetchEvents()}
               variant="outline"
               className="gap-2"
             >
