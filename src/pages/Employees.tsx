@@ -124,18 +124,20 @@ export default function Employees() {
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
-    fetchEmployees(1, value, riskFilter);
   };
 
   const handleRiskFilterChange = (newRisk: string) => {
     setRiskFilter(newRisk);
     setCurrentPage(1);
-    fetchEmployees(1, searchTerm, newRisk);
   };
 
   useEffect(() => {
-    fetchEmployees(1, searchTerm, riskFilter);
-  }, []);
+    const delayDebounce = setTimeout(() => {
+      fetchEmployees(1, searchTerm, riskFilter);
+    }, 1200);
+
+    return () => clearTimeout(delayDebounce)
+  }, [searchTerm, riskFilter]);
 
   const handleNextPage = () => {
     if (hasNext) {
