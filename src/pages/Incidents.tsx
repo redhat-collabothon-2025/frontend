@@ -120,60 +120,60 @@ export default function Incidents() {
         {incidents.map((incident) => (
           <Card key={incident.id} className="border-border bg-card hover:shadow-lg hover:border-white/30 transition-all group">
             <CardContent className="p-3">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-2.5 flex-1 min-w-0">
                   <AlertTriangle className={`h-5 w-5 flex-shrink-0 ${
                     incident.severity === 'CRITICAL' ? 'text-red-500' :
                     incident.severity === 'MEDIUM' ? 'text-yellow-500' :
                     'text-white'
                   }`} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <h3 className="text-sm font-semibold text-white group-hover:text-gray-300 transition-colors">
-                        {incident.incident_type}
-                      </h3>
-                      <Badge
-                        variant={getSeverityBadgeVariant(incident.severity)}
-                        className={`text-xs font-medium ${
-                          incident.severity === 'CRITICAL' ? 'bg-red-500/90 hover:bg-red-500 border-red-600' :
-                          incident.severity === 'MEDIUM' ? 'bg-yellow-500/90 hover:bg-yellow-500 border-yellow-600 text-black' :
-                          ''
-                        }`}
-                      >
-                        {incident.severity}
-                      </Badge>
-                    </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {incident.user_name} ({incident.user_email})
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {new Date(incident.created_at).toLocaleString()}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-sm font-semibold text-white group-hover:text-gray-300 transition-colors">
+                      {incident.incident_type}
+                    </h3>
+                    <Badge
+                      variant={getSeverityBadgeVariant(incident.severity)}
+                      className={`text-xs font-medium ${
+                        incident.severity === 'CRITICAL' ? 'bg-red-500/90 hover:bg-red-500 border-red-600' :
+                        incident.severity === 'MEDIUM' ? 'bg-yellow-500/90 hover:bg-yellow-500 border-yellow-600 text-black' :
+                        ''
+                      }`}
+                    >
+                      {incident.severity}
+                    </Badge>
                   </div>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
-                  <Button
-                    onClick={() => handleResolve(incident.id)}
-                    disabled={resolvingId === incident.id}
-                    size="sm"
-                    className="gap-1 h-8 px-3"
-                  >
-                    <CheckCircle className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">{resolvingId === incident.id ? 'Resolving...' : 'Resolve'}</span>
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(incident.id)}
-                    size="sm"
-                    variant="destructive"
-                    className="gap-1 h-8 px-3"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Delete</span>
-                  </Button>
+                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  <div className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      {incident.user_name} ({incident.user_email})
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {new Date(incident.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleResolve(incident.id)}
+                      disabled={resolvingId === incident.id}
+                      size="sm"
+                      className="gap-1 h-8 px-3"
+                    >
+                      <CheckCircle className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">{resolvingId === incident.id ? 'Resolving...' : 'Resolve'}</span>
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(incident.id)}
+                      size="sm"
+                      variant="destructive"
+                      className="gap-1 h-8 px-3"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Delete</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
