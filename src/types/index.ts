@@ -180,6 +180,21 @@ export interface RiskHistory {
   user: string;
 }
 
+// Log Types
+export interface Log {
+  id: string;
+  timestamp: string;
+  employee_id: string;
+  session_id: string;
+  ip_address: string;
+  user_agent: string;
+  action_type: string;
+  resource_accessed: string;
+  resource_type: string;
+  request_status: 'success' | 'failed';
+  created_at: string;
+}
+
 // Pagination Types
 export interface PaginatedResponse<T> {
   count: number;

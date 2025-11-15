@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Users, AlertTriangle, Target, LogOut, BarChart3 } from 'lucide-react';
+import { Users, AlertTriangle, Target, LogOut, BarChart3, FileText } from 'lucide-react';
 
 export default function Layout() {
   const { logout } = useAuth();
@@ -78,6 +78,17 @@ export default function Layout() {
               >
                 <AlertTriangle className="h-4 w-4 md:mr-2" />
                 <span className="hidden md:inline">Incidents</span>
+              </Link>
+              <Link
+                to="/logs"
+                className={`${
+                  isActive('/logs')
+                    ? 'bg-white text-black'
+                    : 'text-muted-foreground hover:text-white hover:bg-white/10'
+                } inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200`}
+              >
+                <FileText className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Logs</span>
               </Link>
             </div>
 
