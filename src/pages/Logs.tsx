@@ -101,31 +101,31 @@ export default function Logs() {
           <Card key={log.id} className="border-border bg-card hover:shadow-lg hover:border-white/30 transition-all group">
             <CardContent className="p-3">
               <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <FileText className="h-4 w-4 text-white flex-shrink-0" />
+                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                  <FileText className="h-5 w-5 text-white flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <h3 className={`text-xs font-semibold ${getActionTypeColor(log.action_type)} group-hover:text-gray-300 transition-colors`}>
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <h3 className={`text-sm font-semibold ${getActionTypeColor(log.action_type)} group-hover:text-gray-300 transition-colors`}>
                         {log.action_type.replace(/_/g, ' ').toUpperCase()}
                       </h3>
-                      <Badge variant={getStatusBadgeVariant(log.request_status)} className="text-[10px] py-0 h-4">
+                      <Badge variant={getStatusBadgeVariant(log.request_status)} className="text-xs">
                         {log.request_status}
                       </Badge>
-                      <Badge variant="outline" className="text-[10px] py-0 h-4">
+                      <Badge variant="outline" className="text-xs">
                         {log.resource_type}
                       </Badge>
                     </div>
-                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <User className="h-2.5 w-2.5" />
+                        <User className="h-3 w-3" />
                         {log.employee_id}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Globe className="h-2.5 w-2.5" />
+                        <Globe className="h-3 w-3" />
                         {log.ip_address}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock className="h-2.5 w-2.5" />
+                        <Clock className="h-3 w-3" />
                         {new Date(log.timestamp).toLocaleString()}
                       </span>
                     </div>

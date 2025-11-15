@@ -118,39 +118,38 @@ export default function Incidents() {
 
       <div className="space-y-2">
         {incidents.map((incident) => (
-          <Card key={incident.id} className={`border hover:shadow-lg transition-all group ${
-            incident.severity === 'CRITICAL' ? 'bg-red-900/40 border-red-600/60 hover:border-red-500' :
-            incident.severity === 'MEDIUM' ? 'bg-yellow-900/40 border-yellow-600/60 hover:border-yellow-500' :
-            'bg-card border-border hover:border-white/30'
-          }`}>
+          <Card key={incident.id} className="border-border bg-card hover:shadow-lg hover:border-white/30 transition-all group">
             <CardContent className="p-3">
               <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <AlertTriangle className={`h-4 w-4 flex-shrink-0 ${
-                    incident.severity === 'CRITICAL' ? 'text-red-300' :
-                    incident.severity === 'MEDIUM' ? 'text-yellow-300' :
+                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                  <AlertTriangle className={`h-5 w-5 flex-shrink-0 ${
+                    incident.severity === 'CRITICAL' ? 'text-red-500' :
+                    incident.severity === 'MEDIUM' ? 'text-yellow-500' :
                     'text-white'
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <h3 className={`text-xs font-semibold ${
-                        incident.severity === 'CRITICAL' ? 'text-red-200' :
-                        incident.severity === 'MEDIUM' ? 'text-yellow-200' :
-                        'text-white'
-                      } group-hover:text-gray-300 transition-colors`}>
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <h3 className="text-sm font-semibold text-white group-hover:text-gray-300 transition-colors">
                         {incident.incident_type}
                       </h3>
-                      <Badge variant={getSeverityBadgeVariant(incident.severity)} className="text-[10px] py-0 h-4">
+                      <Badge
+                        variant={getSeverityBadgeVariant(incident.severity)}
+                        className={`text-xs font-medium ${
+                          incident.severity === 'CRITICAL' ? 'bg-red-500/90 hover:bg-red-500 border-red-600' :
+                          incident.severity === 'MEDIUM' ? 'bg-yellow-500/90 hover:bg-yellow-500 border-yellow-600 text-black' :
+                          ''
+                        }`}
+                      >
                         {incident.severity}
                       </Badge>
                     </div>
-                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <User className="h-2.5 w-2.5" />
+                        <User className="h-3 w-3" />
                         {incident.user_name} ({incident.user_email})
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock className="h-2.5 w-2.5" />
+                        <Clock className="h-3 w-3" />
                         {new Date(incident.created_at).toLocaleString()}
                       </span>
                     </div>
@@ -161,18 +160,18 @@ export default function Incidents() {
                     onClick={() => handleResolve(incident.id)}
                     disabled={resolvingId === incident.id}
                     size="sm"
-                    className="gap-1 h-7 px-2 text-xs"
+                    className="gap-1 h-8 px-3"
                   >
-                    <CheckCircle className="h-3 w-3" />
+                    <CheckCircle className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{resolvingId === incident.id ? 'Resolving...' : 'Resolve'}</span>
                   </Button>
                   <Button
                     onClick={() => handleDelete(incident.id)}
                     size="sm"
                     variant="destructive"
-                    className="gap-1 h-7 px-2 text-xs"
+                    className="gap-1 h-8 px-3"
                   >
-                    <Trash2 className="h-3 w-3" />
+                    <Trash2 className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Delete</span>
                   </Button>
                 </div>
