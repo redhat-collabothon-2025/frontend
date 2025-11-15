@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Shield, Users, AlertTriangle, Target, LogOut, BarChart3, Activity } from 'lucide-react';
+import { Users, AlertTriangle, Target, LogOut, BarChart3, Activity } from 'lucide-react';
 
 export default function Layout() {
   const { logout } = useAuth();
@@ -20,13 +20,16 @@ export default function Layout() {
       <nav className="border-b border-border bg-card sticky top-0 z-50 shadow-lg">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
+            {/* Logo - White Hat */}
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center transform hover:scale-110 transition-transform">
-                <Shield className="h-5 w-5 text-black" />
+              <div className="relative w-10 h-10 flex items-center justify-center transform hover:scale-110 transition-transform">
+                {/* Hat brim */}
+                <div className="absolute bottom-2 w-10 h-2 bg-white rounded-full"></div>
+                {/* Hat crown */}
+                <div className="absolute top-1 w-6 h-6 bg-white rounded-t-full"></div>
               </div>
               <span className="text-xl font-bold text-white hidden md:inline">
-                SecureAware
+                WhiteHat
               </span>
             </div>
 

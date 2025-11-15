@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Sparkles } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -33,17 +32,18 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center">
       <Card className="w-full max-w-md border-border shadow-2xl bg-card">
         <CardHeader className="space-y-1 flex flex-col items-center pb-8">
-          <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-white mb-4 shadow-lg">
-            <Shield className="h-8 w-8 text-black" />
+          {/* White Hat Logo */}
+          <div className="relative w-20 h-20 flex items-center justify-center mb-4">
+            {/* Hat brim */}
+            <div className="absolute bottom-6 w-20 h-3 bg-white rounded-full shadow-lg"></div>
+            {/* Hat crown */}
+            <div className="absolute top-3 w-12 h-12 bg-white rounded-t-full shadow-lg"></div>
           </div>
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-3xl font-bold text-white">
-              SecureAware
-            </CardTitle>
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
-          <CardDescription className="text-muted-foreground">
-            Security Training Platform
+          <CardTitle className="text-4xl font-bold text-white">
+            WhiteHat
+          </CardTitle>
+          <CardDescription className="text-muted-foreground text-base">
+            Security Awareness Platform
           </CardDescription>
         </CardHeader>
         <CardContent className="pb-8">

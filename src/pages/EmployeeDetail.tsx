@@ -91,7 +91,7 @@ export default function EmployeeDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-white">Loading...</div>
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function EmployeeDetail() {
   if (!employee) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Employee not found</div>
+        <div className="text-white">Employee not found</div>
       </div>
     );
   }
@@ -117,8 +117,8 @@ export default function EmployeeDetail() {
 
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{employee.name}</h1>
-          <p className="text-gray-500 mt-1 flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-white">{employee.name}</h1>
+          <p className="text-muted-foreground mt-1 flex items-center gap-2">
             <Mail className="h-4 w-4" />
             {employee.email}
           </p>
@@ -149,14 +149,14 @@ export default function EmployeeDetail() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-gray-500">Risk Score</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Risk Score</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-8 w-8 text-primary" />
               <div>
-                <div className="text-3xl font-bold">{employee.risk_score.toFixed(1)}</div>
-                <p className="text-xs text-gray-500">Out of 100</p>
+                <div className="text-3xl font-bold text-white">{employee.risk_score.toFixed(1)}</div>
+                <p className="text-xs text-muted-foreground">Out of 100</p>
               </div>
             </div>
           </CardContent>
@@ -164,28 +164,28 @@ export default function EmployeeDetail() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-gray-500">Total Incidents</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Incidents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{employee.incident_count}</div>
-            <p className="text-xs text-gray-500">Security incidents</p>
+            <div className="text-3xl font-bold text-white">{employee.incident_count}</div>
+            <p className="text-xs text-muted-foreground">Security incidents</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-gray-500">Last Incident</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Last Incident</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-gray-400" />
+              <Calendar className="h-5 w-5 text-muted-foreground" />
               <div>
                 {employee.last_incident ? (
-                  <div className="text-sm">
+                  <div className="text-sm text-white">
                     {new Date(employee.last_incident).toLocaleDateString()}
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-500">No incidents</div>
+                  <div className="text-sm text-muted-foreground">No incidents</div>
                 )}
               </div>
             </div>
@@ -200,17 +200,17 @@ export default function EmployeeDetail() {
         <CardContent>
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <dt className="text-sm font-medium text-gray-500">Employee ID</dt>
-              <dd className="mt-1 text-sm text-gray-900 font-mono">{employee.id}</dd>
+              <dt className="text-sm font-medium text-muted-foreground">Employee ID</dt>
+              <dd className="mt-1 text-sm text-white font-mono">{employee.id}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Created At</dt>
-              <dd className="mt-1 text-sm text-gray-900">
+              <dt className="text-sm font-medium text-muted-foreground">Created At</dt>
+              <dd className="mt-1 text-sm text-white">
                 {new Date(employee.created_at).toLocaleDateString()}
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Risk Level</dt>
+              <dt className="text-sm font-medium text-muted-foreground">Risk Level</dt>
               <dd className="mt-1">
                 <Badge variant={getRiskBadgeVariant(employee.risk_level)}>
                   {employee.risk_level}
@@ -218,8 +218,8 @@ export default function EmployeeDetail() {
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Risk Score</dt>
-              <dd className="mt-1 text-sm text-gray-900 font-semibold">
+              <dt className="text-sm font-medium text-muted-foreground">Risk Score</dt>
+              <dd className="mt-1 text-sm text-white font-semibold">
                 {employee.risk_score.toFixed(2)}
               </dd>
             </div>
@@ -238,21 +238,21 @@ export default function EmployeeDetail() {
           {riskHistory.length > 0 ? (
             <div className="space-y-3">
               {riskHistory.map((record) => (
-                <div key={record.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <div key={record.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent transition-colors">
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">
+                    <p className="font-medium text-white">
                       Risk Score: {record.risk_score.toFixed(1)}
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">{record.reason}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{record.reason}</p>
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-muted-foreground">
                     {new Date(record.created_at).toLocaleString()}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">No risk history available</p>
+            <p className="text-muted-foreground text-center py-8">No risk history available</p>
           )}
         </CardContent>
       </Card>
