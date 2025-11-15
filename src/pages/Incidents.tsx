@@ -4,18 +4,26 @@ import type { Incident } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Clock, User, CheckCircle, RefreshCw, Trash2 } from 'lucide-react';
+import { AlertTriangle, Clock, User, CheckCircle, RefreshCw, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Incidents() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
 
-  const fetchIncidents = async () => {
+  const fetchIncidents = async (page: number = 1) => {
     setLoading(true);
     try {
-      const response = await incidentsService.list();
+      const response = await incidentsService.list(page);
       setIncidents(response.results || []);
+      setTotalCount(response.count || 0);
+      setHasNext(!!response.next);
+      setHasPrevious(!!response.previous);
+      setCurrentPage(page);
     } catch (error) {
       console.error('Error fetching incidents:', error);
     } finally {
@@ -27,7 +35,7 @@ export default function Incidents() {
     setResolvingId(incidentId);
     try {
       await incidentsService.resolve(incidentId);
-      await fetchIncidents();
+      await fetchIncidents(currentPage);
       alert('Incident resolved successfully!');
     } catch (error) {
       console.error('Error resolving incident:', error);
@@ -42,7 +50,7 @@ export default function Incidents() {
 
     try {
       await incidentsService.delete(incidentId);
-      await fetchIncidents();
+      await fetchIncidents(currentPage);
       alert('Incident deleted successfully!');
     } catch (error) {
       console.error('Error deleting incident:', error);
@@ -50,8 +58,20 @@ export default function Incidents() {
     }
   };
 
+  const handleNextPage = () => {
+    if (hasNext) {
+      fetchIncidents(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (hasPrevious) {
+      fetchIncidents(currentPage - 1);
+    }
+  };
+
   useEffect(() => {
-    fetchIncidents();
+    fetchIncidents(1);
   }, []);
 
   const getSeverityBadgeVariant = (severity: string) => {
@@ -82,10 +102,12 @@ export default function Incidents() {
           <h1 className="text-4xl font-bold text-white">
             Incidents
           </h1>
-          <p className="text-muted-foreground mt-2">Security incidents and events monitoring</p>
+          <p className="text-muted-foreground mt-2">
+            Security incidents and events monitoring • {totalCount} total incidents
+          </p>
         </div>
         <Button
-          onClick={fetchIncidents}
+          onClick={() => fetchIncidents(currentPage)}
           variant="outline"
           className="gap-2"
         >
@@ -160,6 +182,37 @@ export default function Incidents() {
           </Card>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalCount > 0 && (
+        <div className="flex items-center justify-between border-t border-border pt-4">
+          <div className="text-sm text-muted-foreground">
+            Page {currentPage} • Showing {incidents.length} of {totalCount} incidents
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handlePreviousPage}
+              disabled={!hasPrevious}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <Button
+              onClick={handleNextPage}
+              disabled={!hasNext}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {incidents.length === 0 && (
         <Card className="border-border bg-card">

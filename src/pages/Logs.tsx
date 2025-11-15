@@ -4,11 +4,12 @@ import type { Log } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, Clock, User, Globe, RefreshCw, Monitor, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Clock, User, Globe, RefreshCw, Monitor, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
 
 export default function Logs() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
@@ -43,6 +44,21 @@ export default function Logs() {
   const handlePreviousPage = () => {
     if (hasPrevious) {
       fetchLogs(currentPage - 1);
+    }
+  };
+
+  const handleAnalyzeLogs = async () => {
+    setAnalyzing(true);
+    try {
+      const result = await logsService.analyze(totalCount);
+      alert(`Analysis Complete!\n\nAnalyzed ${result.results.analyzed} logs\nCreated ${result.results.incidents_created} incidents\n- Critical: ${result.results.critical_risk}\n- Medium: ${result.results.medium_risk}`);
+      // Refresh the current page
+      fetchLogs(currentPage);
+    } catch (error) {
+      alert('Analysis Failed. Please try again.');
+      console.error('Error analyzing logs:', error);
+    } finally {
+      setAnalyzing(false);
     }
   };
 
@@ -82,14 +98,25 @@ export default function Logs() {
             Security and activity logs from employee systems • {totalCount} total logs
           </p>
         </div>
-        <Button
-          onClick={() => fetchLogs(currentPage)}
-          variant="outline"
-          className="gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleAnalyzeLogs}
+            disabled={analyzing}
+            variant="default"
+            className="gap-2"
+          >
+            <Shield className="h-4 w-4" />
+            {analyzing ? 'Analyzing...' : 'Analyze Logs'}
+          </Button>
+          <Button
+            onClick={() => fetchLogs(currentPage)}
+            variant="outline"
+            className="gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-4">

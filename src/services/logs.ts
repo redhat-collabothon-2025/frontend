@@ -15,4 +15,12 @@ export const logsService = {
     const response = await api.get<Log>(`/api/logs/${id}/`);
     return response.data;
   },
+
+  // POST /api/logs/analyze/
+  analyze: async (limit?: number) => {
+    const response = await api.post('/api/logs/analyze/', {
+      limit: limit || 100,
+    });
+    return response.data;
+  },
 };
