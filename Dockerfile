@@ -89,3 +89,5 @@ USER 1001
 EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
+
+# --- IGNORE ---
