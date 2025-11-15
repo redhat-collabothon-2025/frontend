@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
 import { logsService } from '@/services';
 import type { Log } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, Clock, User, Globe, RefreshCw, Monitor, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
+import { FileText, Clock, User, Globe, RefreshCw, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
 
 export default function Logs() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
-  const [analyzing, setAnalyzing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
@@ -44,21 +43,6 @@ export default function Logs() {
   const handlePreviousPage = () => {
     if (hasPrevious) {
       fetchLogs(currentPage - 1);
-    }
-  };
-
-  const handleAnalyzeLogs = async () => {
-    setAnalyzing(true);
-    try {
-      const result = await logsService.analyze(totalCount);
-      alert(`Analysis Complete!\n\nAnalyzed ${result.results.analyzed} logs\nCreated ${result.results.incidents_created} incidents\n- Critical: ${result.results.critical_risk}\n- Medium: ${result.results.medium_risk}`);
-      // Refresh the current page
-      fetchLogs(currentPage);
-    } catch (error) {
-      alert('Analysis Failed. Please try again.');
-      console.error('Error analyzing logs:', error);
-    } finally {
-      setAnalyzing(false);
     }
   };
 
@@ -97,95 +81,55 @@ export default function Logs() {
           <p className="text-muted-foreground mt-2">
             Security and activity logs from employee systems • {totalCount} total logs
           </p>
+          <p className="text-sm text-muted-foreground/70 mt-1 flex items-center gap-2">
+            <Shield className="h-3.5 w-3.5" />
+            Auto-analysis enabled: New logs are automatically analyzed for security risks
+          </p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={handleAnalyzeLogs}
-            disabled={analyzing}
-            variant="default"
-            className="gap-2"
-          >
-            <Shield className="h-4 w-4" />
-            {analyzing ? 'Analyzing...' : 'Analyze Logs'}
-          </Button>
-          <Button
-            onClick={() => fetchLogs(currentPage)}
-            variant="outline"
-            className="gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
-        </div>
+        <Button
+          onClick={() => fetchLogs(currentPage)}
+          variant="outline"
+          className="gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Refresh
+        </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {logs.map((log) => (
-          <Card key={log.id} className="border-border bg-card hover:shadow-xl hover:border-white transition-all group">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center">
-                    <FileText className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-3 flex-wrap">
-                    <h3 className={`text-lg font-semibold ${getActionTypeColor(log.action_type)} group-hover:text-gray-300 transition-colors`}>
-                      {log.action_type.replace(/_/g, ' ').toUpperCase()}
-                    </h3>
-                    <Badge variant={getStatusBadgeVariant(log.request_status)} className="shadow-sm">
-                      {log.request_status}
-                    </Badge>
-                    <Badge variant="outline" className="shadow-sm">
-                      {log.resource_type}
-                    </Badge>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <div className="p-1.5 rounded-md bg-accent">
-                        <User className="h-3.5 w-3.5" />
-                      </div>
-                      <span>Employee: {log.employee_id}</span>
+          <Card key={log.id} className="border-border bg-card hover:shadow-lg hover:border-white/30 transition-all group">
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <FileText className="h-4 w-4 text-white flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <h3 className={`text-xs font-semibold ${getActionTypeColor(log.action_type)} group-hover:text-gray-300 transition-colors`}>
+                        {log.action_type.replace(/_/g, ' ').toUpperCase()}
+                      </h3>
+                      <Badge variant={getStatusBadgeVariant(log.request_status)} className="text-[10px] py-0 h-4">
+                        {log.request_status}
+                      </Badge>
+                      <Badge variant="outline" className="text-[10px] py-0 h-4">
+                        {log.resource_type}
+                      </Badge>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <div className="p-1.5 rounded-md bg-accent">
-                        <Globe className="h-3.5 w-3.5" />
-                      </div>
-                      <span>IP: {log.ip_address}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <div className="p-1.5 rounded-md bg-accent">
-                        <Clock className="h-3.5 w-3.5" />
-                      </div>
-                      <span>{new Date(log.timestamp).toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <div className="p-1.5 rounded-md bg-accent">
-                        <Monitor className="h-3.5 w-3.5" />
-                      </div>
-                      <span className="truncate">{log.user_agent.substring(0, 30)}...</span>
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <User className="h-2.5 w-2.5" />
+                        {log.employee_id}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Globe className="h-2.5 w-2.5" />
+                        {log.ip_address}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-2.5 w-2.5" />
+                        {new Date(log.timestamp).toLocaleString()}
+                      </span>
                     </div>
                   </div>
-
-                  <Card className="bg-accent border-border mt-3">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-muted-foreground">Resource Details</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Resource: </span>
-                          <span className="text-white font-medium">{log.resource_accessed}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Session: </span>
-                          <span className="text-white font-mono text-xs">{log.session_id}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
                 </div>
               </div>
             </CardContent>

@@ -116,64 +116,63 @@ export default function Incidents() {
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {incidents.map((incident) => (
-          <Card key={incident.id} className="border-border bg-card hover:shadow-xl hover:border-white transition-all group">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex gap-4 flex-1">
-                  <div className="flex-shrink-0">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      incident.severity === 'CRITICAL' ? 'bg-white/20 border border-white/30' :
-                      incident.severity === 'MEDIUM' ? 'bg-white/15 border border-white/20' : 
-                      'bg-white/10 border border-white/15'
-                    }`}>
-                      <AlertTriangle className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
+          <Card key={incident.id} className={`border hover:shadow-lg transition-all group ${
+            incident.severity === 'CRITICAL' ? 'bg-red-900/40 border-red-600/60 hover:border-red-500' :
+            incident.severity === 'MEDIUM' ? 'bg-yellow-900/40 border-yellow-600/60 hover:border-yellow-500' :
+            'bg-card border-border hover:border-white/30'
+          }`}>
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <AlertTriangle className={`h-4 w-4 flex-shrink-0 ${
+                    incident.severity === 'CRITICAL' ? 'text-red-300' :
+                    incident.severity === 'MEDIUM' ? 'text-yellow-300' :
+                    'text-white'
+                  }`} />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg font-semibold text-white group-hover:text-gray-300 transition-colors">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <h3 className={`text-xs font-semibold ${
+                        incident.severity === 'CRITICAL' ? 'text-red-200' :
+                        incident.severity === 'MEDIUM' ? 'text-yellow-200' :
+                        'text-white'
+                      } group-hover:text-gray-300 transition-colors`}>
                         {incident.incident_type}
                       </h3>
-                      <Badge variant={getSeverityBadgeVariant(incident.severity)} className="shadow-sm">
+                      <Badge variant={getSeverityBadgeVariant(incident.severity)} className="text-[10px] py-0 h-4">
                         {incident.severity}
                       </Badge>
                     </div>
-                    <div className="flex flex-wrap gap-4 text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <div className="p-1.5 rounded-md bg-accent">
-                          <User className="h-3.5 w-3.5" />
-                        </div>
-                        <span>{incident.user_name}</span>
-                        <span className="text-muted-foreground/60">({incident.user_email})</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <div className="p-1.5 rounded-md bg-accent">
-                          <Clock className="h-3.5 w-3.5" />
-                        </div>
-                        <span>{new Date(incident.created_at).toLocaleString()}</span>
-                      </div>
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <User className="h-2.5 w-2.5" />
+                        {incident.user_name} ({incident.user_email})
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-2.5 w-2.5" />
+                        {new Date(incident.created_at).toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 </div>
-                <div className="ml-auto pl-4 flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
                   <Button
                     onClick={() => handleResolve(incident.id)}
                     disabled={resolvingId === incident.id}
                     size="sm"
-                    className="gap-2"
+                    className="gap-1 h-7 px-2 text-xs"
                   >
-                    <CheckCircle className="h-4 w-4" />
-                    {resolvingId === incident.id ? 'Resolving...' : 'Resolve'}
+                    <CheckCircle className="h-3 w-3" />
+                    <span className="hidden sm:inline">{resolvingId === incident.id ? 'Resolving...' : 'Resolve'}</span>
                   </Button>
                   <Button
                     onClick={() => handleDelete(incident.id)}
                     size="sm"
                     variant="destructive"
-                    className="gap-2"
+                    className="gap-1 h-7 px-2 text-xs"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                     <span className="hidden sm:inline">Delete</span>
                   </Button>
                 </div>
