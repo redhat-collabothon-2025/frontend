@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 export default function Employees() {
   const [employees, setEmployees] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [riskFilter, setRiskFilter] = useState<string>('all');
   const [recalculating, setRecalculating] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<Set<string>>(new Set());
@@ -121,23 +121,19 @@ export default function Employees() {
     }
   };
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
+  const handleSearch = () => {
     setCurrentPage(1);
+    fetchEmployees(1, searchTerm, riskFilter);
   };
 
   const handleRiskFilterChange = (newRisk: string) => {
     setRiskFilter(newRisk);
     setCurrentPage(1);
+    fetchEmployees(1, searchTerm, newRisk);
   };
-
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      fetchEmployees(1, searchTerm, riskFilter);
-    }, 1200);
-
-    return () => clearTimeout(delayDebounce)
-  }, [searchTerm, riskFilter]);
+    fetchEmployees(1, searchTerm, riskFilter);
+  }, [])
 
   const handleNextPage = () => {
     if (hasNext) {
@@ -236,12 +232,24 @@ export default function Employees() {
         <CardHeader>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search employees by name or email..."
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 h-11 bg-background border-border"
-            />
+            <div className="flex gap-2 items-center">
+              <Input
+                placeholder="Search employees by name or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
+                className="pl-10 h-11 bg-background border-border"
+              />
+
+              <Button
+                onClick={handleSearch}
+                className="h-11"
+              >
+                Search
+              </Button>
+            </div>
           </div>
         </CardHeader>
       </Card>
