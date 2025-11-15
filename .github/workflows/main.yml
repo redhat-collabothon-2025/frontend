@@ -1,4 +1,4 @@
-name: Deploy Frontend to OpenShift
+name: Deploy Backend to OpenShift
 
 on:
   push:
@@ -12,44 +12,47 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Build frontend
-        env:
-          CI: false
-          VITE_API_URL: https://backend-white-hat-project.apps.cluster-xdhbp.xdhbp.sandbox1403.opentlc.com
-        run: npm run build
-      
       - name: Install oc CLI
         uses: redhat-actions/oc-installer@v1
         with:
-          version: '4.12'
+          oc_version: latest
       
       - name: Login to OpenShift
         uses: redhat-actions/oc-login@v1
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-          namespace: white-hat-project
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
           insecure_skip_tls_verify: true
       
-      - name: Deploy to OpenShift
+      - name: Trigger Build
         run: |
-          # Создаём ConfigMap с собранными файлами
-          oc create configmap frontend-build --from-file=dist/ --dry-run=client -o yaml | oc apply -f -
+          oc start-build backend --follow --wait
+      
+      - name: Deploy Application
+        run: |
+          # Apply deployment, service, and route
+          oc apply -f k8s/backend-deployment.yaml
           
-          # Если используешь Deployment вместо BuildConfig:
-          oc rollout restart deployment/frontend || echo "Deployment not found"
-          oc rollout status deployment/frontend -w --timeout=5m || echo "Waiting for deployment"
+          # Force new rollout to use the latest image
+          oc rollout restart deployment/backend
+          
+          # Wait for rollout to complete
+          oc rollout status deployment/backend -w --timeout=5m
       
       - name: Verify Deployment
         run: |
-          oc get pods -l app=frontend
-          oc get route frontend
+          echo "=== Pods ==="
+          oc get pods -l app=backend
+          
+          echo "=== Deployment Status ==="
+          oc get deployment backend
+          
+          echo "=== Service ==="
+          oc get svc backend
+          
+          echo "=== Route ==="
+          oc get route backend
+          
+          echo "=== Backend URL ==="
+          echo "https://$(oc get route backend -o jsonpath='{.spec.host}')"
