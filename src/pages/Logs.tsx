@@ -4,17 +4,25 @@ import type { Log } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, Clock, User, Globe, RefreshCw, Monitor } from 'lucide-react';
+import { FileText, Clock, User, Globe, RefreshCw, Monitor, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Logs() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
 
-  const fetchLogs = async () => {
+  const fetchLogs = async (page: number = 1) => {
     setLoading(true);
     try {
-      const response = await logsService.list();
+      const response = await logsService.list(page);
       setLogs(response.results || []);
+      setTotalCount(response.count || 0);
+      setHasNext(!!response.next);
+      setHasPrevious(!!response.previous);
+      setCurrentPage(page);
     } catch (error) {
       console.error('Error fetching logs:', error);
     } finally {
@@ -23,8 +31,20 @@ export default function Logs() {
   };
 
   useEffect(() => {
-    fetchLogs();
+    fetchLogs(1);
   }, []);
+
+  const handleNextPage = () => {
+    if (hasNext) {
+      fetchLogs(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (hasPrevious) {
+      fetchLogs(currentPage - 1);
+    }
+  };
 
   const getStatusBadgeVariant = (status: string) => {
     return status === 'success' ? 'success' : 'destructive';
@@ -58,10 +78,12 @@ export default function Logs() {
           <h1 className="text-4xl font-bold text-white">
             Employee Logs
           </h1>
-          <p className="text-muted-foreground mt-2">Security and activity logs from employee systems</p>
+          <p className="text-muted-foreground mt-2">
+            Security and activity logs from employee systems • {totalCount} total logs
+          </p>
         </div>
         <Button
-          onClick={fetchLogs}
+          onClick={() => fetchLogs(currentPage)}
           variant="outline"
           className="gap-2"
         >
@@ -143,6 +165,37 @@ export default function Logs() {
           </Card>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalCount > 0 && (
+        <div className="flex items-center justify-between border-t border-border pt-4">
+          <div className="text-sm text-muted-foreground">
+            Page {currentPage} • Showing {logs.length} of {totalCount} logs
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handlePreviousPage}
+              disabled={!hasPrevious}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <Button
+              onClick={handleNextPage}
+              disabled={!hasNext}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {logs.length === 0 && (
         <Card className="border-border bg-card">
