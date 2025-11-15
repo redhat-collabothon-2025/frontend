@@ -162,26 +162,29 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] flex items-center justify-center">
-              <Doughnut
-                data={{
-                  labels: distribution.map(d => d.risk_level),
-                  datasets: [{
-                    data: distribution.map(d => d.count),
-                    backgroundColor: [
-                      'rgba(239, 68, 68, 0.8)',    // Red for CRITICAL
-                      'rgba(251, 191, 36, 0.8)',   // Yellow for MEDIUM
-                      'rgba(34, 197, 94, 0.8)',    // Green for LOW
-                    ],
-                    borderColor: [
-                      'rgba(239, 68, 68, 1)',
-                      'rgba(251, 191, 36, 1)',
-                      'rgba(34, 197, 94, 1)',
-                    ],
-                    borderWidth: 2,
-                    hoverOffset: 20,
-                    hoverBorderWidth: 3,
-                  }]
-                }}
+              {distribution.length === 0 ? (
+                <div className="text-muted-foreground">No data available</div>
+              ) : (
+                <Doughnut
+                  data={{
+                    labels: distribution.map(d => d.risk_level),
+                    datasets: [{
+                      data: distribution.map(d => d.count),
+                      backgroundColor: distribution.map(d => {
+                        if (d.risk_level === 'CRITICAL') return 'rgba(239, 68, 68, 0.8)';  // Red
+                        if (d.risk_level === 'MEDIUM') return 'rgba(251, 191, 36, 0.8)';   // Yellow
+                        return 'rgba(34, 197, 94, 0.8)';  // Green for LOW
+                      }),
+                      borderColor: distribution.map(d => {
+                        if (d.risk_level === 'CRITICAL') return 'rgba(239, 68, 68, 1)';
+                        if (d.risk_level === 'MEDIUM') return 'rgba(251, 191, 36, 1)';
+                        return 'rgba(34, 197, 94, 1)';
+                      }),
+                      borderWidth: 2,
+                      hoverOffset: 20,
+                      hoverBorderWidth: 3,
+                    }]
+                  }}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
@@ -221,7 +224,8 @@ export default function Dashboard() {
                     duration: 2000,
                   }
                 }}
-              />
+                />
+              )}
             </div>
           </CardContent>
         </Card>
