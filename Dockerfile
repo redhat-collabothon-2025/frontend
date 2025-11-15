@@ -10,7 +10,7 @@ RUN npm run build
 
 FROM registry.access.redhat.com/ubi9/nginx-122
 
-COPY --from=build --chown=1001:0 /app/build /usr/share/nginx/html
+COPY --from=build --chown=1001:0 /app/dist /usr/share/nginx/html
 
 EXPOSE 8080
 
