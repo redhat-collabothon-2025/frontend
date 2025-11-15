@@ -12,6 +12,8 @@ FROM registry.access.redhat.com/ubi9/nginx-122
 
 COPY --from=build --chown=1001:0 /app/dist /usr/share/nginx/html
 
+RUN chmod -R g+rX /usr/share/nginx/html
+
 EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
