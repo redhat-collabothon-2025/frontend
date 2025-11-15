@@ -143,13 +143,13 @@ export default function Incidents() {
                     </Badge>
                   </div>
                 </div>
-                <div className="flex flex-col gap-0.5 text-xs flex-1 min-w-0">
-                  <span className="flex items-center gap-1 text-blue-400 font-medium">
-                    <User className="h-3 w-3" />
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span className="flex items-center gap-1 text-sm">
+                    <User className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-white font-semibold">{incident.user_name}</span>
-                    <span className="text-blue-300">({incident.user_email})</span>
+                    <span className="text-gray-400">({incident.user_email})</span>
                   </span>
-                  <span className="flex items-center gap-1 text-muted-foreground">
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
                     {new Date(incident.created_at).toLocaleString()}
                   </span>
