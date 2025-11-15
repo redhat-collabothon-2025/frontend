@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Target, Calendar, Users, MousePointerClick, Play, Pause, RefreshCw, Plus, Eye, TrendingUp, Trash2, Activity, Clock, User } from 'lucide-react';
+import { Target, Calendar, Users, MousePointerClick, Play, Pause, RefreshCw, Plus, Eye, TrendingUp, Trash2, Activity, Clock, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Campaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -22,6 +23,14 @@ export default function Campaigns() {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [analytics, setAnalytics] = useState<CampaignAnalytics | null>(null);
   const [activeTab, setActiveTab] = useState<'campaigns' | 'events'>('campaigns');
+  const [currentCampaignPage, setCurrentCampaignPage] = useState(1);
+  const [totalCampaignCount, setTotalCampaignCount] = useState(0);
+  const [hasCampaignNext, setHasCampaignNext] = useState(false);
+  const [hasCampaignPrevious, setHasCampaignPrevious] = useState(false);
+  const [currentEventPage, setCurrentEventPage] = useState(1);
+  const [totalEventCount, setTotalEventCount] = useState(0);
+  const [hasEventNext, setHasEventNext] = useState(false);
+  const [hasEventPrevious, setHasEventPrevious] = useState(false);
   const [formData, setFormData] = useState({
     persona_name: '',
     scenario: '',
@@ -31,11 +40,15 @@ export default function Campaigns() {
     status: 'draft' as const,
   });
 
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = async (page: number = 1) => {
     setLoading(true);
     try {
-      const response = await campaignsService.list();
+      const response = await campaignsService.list(page);
       setCampaigns(response.results || []);
+      setTotalCampaignCount(response.count || 0);
+      setHasCampaignNext(!!response.next);
+      setHasCampaignPrevious(!!response.previous);
+      setCurrentCampaignPage(page);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
     } finally {
@@ -43,11 +56,15 @@ export default function Campaigns() {
     }
   };
 
-  const fetchEvents = async () => {
+  const fetchEvents = async (page: number = 1) => {
     setEventsLoading(true);
     try {
-      const response = await eventsService.list();
+      const response = await eventsService.list(page);
       setEvents(response.results || []);
+      setTotalEventCount(response.count || 0);
+      setHasEventNext(!!response.next);
+      setHasEventPrevious(!!response.previous);
+      setCurrentEventPage(page);
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
@@ -59,11 +76,11 @@ export default function Campaigns() {
     setActionLoading(campaign.id);
     try {
       await campaignsService.launch(campaign.id, campaign);
-      await fetchCampaigns();
-      alert('Campaign launched successfully!');
+      await fetchCampaigns(currentCampaignPage);
+      toast.success('Campaign launched successfully!');
     } catch (error) {
       console.error('Error launching campaign:', error);
-      alert('Failed to launch campaign');
+      toast.error('Failed to launch campaign');
     } finally {
       setActionLoading(null);
     }
@@ -73,11 +90,11 @@ export default function Campaigns() {
     setActionLoading(campaign.id);
     try {
       await campaignsService.pause(campaign.id, campaign);
-      await fetchCampaigns();
-      alert('Campaign paused successfully!');
+      await fetchCampaigns(currentCampaignPage);
+      toast.success('Campaign paused successfully!');
     } catch (error) {
       console.error('Error pausing campaign:', error);
-      alert('Failed to pause campaign');
+      toast.error('Failed to pause campaign');
     } finally {
       setActionLoading(null);
     }
@@ -95,11 +112,11 @@ export default function Campaigns() {
         sent_at: new Date().toISOString().split('T')[0],
         status: 'draft',
       });
-      await fetchCampaigns();
-      alert('Campaign created successfully!');
+      await fetchCampaigns(currentCampaignPage);
+      toast.success('Campaign created successfully!');
     } catch (error) {
       console.error('Error creating campaign:', error);
-      alert('Failed to create campaign');
+      toast.error('Failed to create campaign');
     }
   };
 
@@ -115,23 +132,56 @@ export default function Campaigns() {
   };
 
   const handleDelete = async (campaignId: string) => {
-    if (!confirm('Are you sure you want to delete this campaign?')) return;
-
-    try {
-      await campaignsService.delete(campaignId);
-      await fetchCampaigns();
-      if (detailOpen) setDetailOpen(false);
-      alert('Campaign deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting campaign:', error);
-      alert('Failed to delete campaign');
-    }
+    toast('Are you sure you want to delete this campaign?', {
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            await campaignsService.delete(campaignId);
+            await fetchCampaigns(currentCampaignPage);
+            if (detailOpen) setDetailOpen(false);
+            toast.success('Campaign deleted successfully!');
+          } catch (error) {
+            console.error('Error deleting campaign:', error);
+            toast.error('Failed to delete campaign');
+          }
+        },
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {},
+      },
+    });
   };
 
   useEffect(() => {
     fetchCampaigns();
     fetchEvents();
   }, []);
+
+  const handleCampaignNextPage = () => {
+    if (hasCampaignNext) {
+      fetchCampaigns(currentCampaignPage + 1);
+    }
+  };
+
+  const handleCampaignPreviousPage = () => {
+    if (hasCampaignPrevious) {
+      fetchCampaigns(currentCampaignPage - 1);
+    }
+  };
+
+  const handleEventNextPage = () => {
+    if (hasEventNext) {
+      fetchEvents(currentEventPage + 1);
+    }
+  };
+
+  const handleEventPreviousPage = () => {
+    if (hasEventPrevious) {
+      fetchEvents(currentEventPage - 1);
+    }
+  };
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -308,6 +358,37 @@ export default function Campaigns() {
         })}
       </div>
 
+          {/* Pagination Controls */}
+          {totalCampaignCount > 0 && (
+            <div className="flex items-center justify-between border-t border-border pt-4 mt-6">
+              <div className="text-sm text-muted-foreground">
+                Page {currentCampaignPage} • Showing {campaigns.length} of {totalCampaignCount} campaigns
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleCampaignPreviousPage}
+                  disabled={!hasCampaignPrevious}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                <Button
+                  onClick={handleCampaignNextPage}
+                  disabled={!hasCampaignNext}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
           {campaigns.length === 0 && (
             <Card className="border-border bg-card">
               <CardContent className="p-12 text-center">
@@ -376,6 +457,37 @@ export default function Campaigns() {
               );
             })}
           </div>
+
+          {/* Pagination Controls */}
+          {totalEventCount > 0 && (
+            <div className="flex items-center justify-between border-t border-border pt-4 mt-6">
+              <div className="text-sm text-muted-foreground">
+                Page {currentEventPage} • Showing {events.length} of {totalEventCount} events
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleEventPreviousPage}
+                  disabled={!hasEventPrevious}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                <Button
+                  onClick={handleEventNextPage}
+                  disabled={!hasEventNext}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
 
           {events.length === 0 && (
             <Card className="border-border bg-card">

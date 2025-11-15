@@ -166,7 +166,7 @@ export interface RiskTrending {
 }
 
 export interface RiskHeatmap {
-  department: string;
+  risk_level: string;
   week: string;
   risk_score: number;
   incident_count: number;

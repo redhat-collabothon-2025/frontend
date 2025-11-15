@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Mail, Calendar, TrendingUp, Send, History, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function EmployeeDetail() {
   const { id } = useParams<{ id: string }>();
@@ -45,10 +46,10 @@ export default function EmployeeDetail() {
         template_type: 'linkedin',
         tracking_enabled: true,
       });
-      alert(`Phishing email sent successfully! Tracking ID: ${response.tracking_id}`);
+      toast.success(`Phishing email sent successfully! Tracking ID: ${response.tracking_id}`);
     } catch (error) {
       console.error('Error sending phishing email:', error);
-      alert('Failed to send phishing email');
+      toast.error('Failed to send phishing email');
     } finally {
       setSendingPhishing(false);
     }
@@ -56,16 +57,26 @@ export default function EmployeeDetail() {
 
   const handleDelete = async () => {
     if (!id) return;
-    if (!confirm('Are you sure you want to delete this employee? This action cannot be undone.')) return;
 
-    try {
-      await employeesService.delete(id);
-      alert('Employee deleted successfully!');
-      navigate('/employees');
-    } catch (error) {
-      console.error('Error deleting employee:', error);
-      alert('Failed to delete employee');
-    }
+    toast('Are you sure you want to delete this employee? This action cannot be undone.', {
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            await employeesService.delete(id);
+            toast.success('Employee deleted successfully!');
+            navigate('/employees');
+          } catch (error) {
+            console.error('Error deleting employee:', error);
+            toast.error('Failed to delete employee');
+          }
+        },
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {},
+      },
+    });
   };
 
   useEffect(() => {

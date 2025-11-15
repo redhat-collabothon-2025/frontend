@@ -3,9 +3,14 @@ import type { User, EmployeeDetail, RiskHistory, PaginatedResponse } from '@/typ
 
 export const employeesService = {
   // GET /api/employees/
-  list: async (page?: number): Promise<PaginatedResponse<User>> => {
+  list: async (page?: number, search?: string, riskLevel?: string): Promise<PaginatedResponse<User>> => {
+    const params: { page?: number; search?: string; risk_level?: string } = {};
+    if (page) params.page = page;
+    if (search) params.search = search;
+    if (riskLevel && riskLevel !== 'all') params.risk_level = riskLevel;
+
     const response = await api.get<PaginatedResponse<User>>('/api/employees/', {
-      params: { page },
+      params,
     });
     return response.data;
   },

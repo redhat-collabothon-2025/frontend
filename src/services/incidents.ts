@@ -3,9 +3,13 @@ import type { Incident, IncidentCreate, IncidentUpdate, PaginatedResponse } from
 
 export const incidentsService = {
   // GET /api/incidents/
-  list: async (page?: number): Promise<PaginatedResponse<Incident>> => {
+  list: async (page?: number, severity?: string): Promise<PaginatedResponse<Incident>> => {
+    const params: { page?: number; severity?: string } = {};
+    if (page) params.page = page;
+    if (severity && severity !== 'all') params.severity = severity;
+
     const response = await api.get<PaginatedResponse<Incident>>('/api/incidents/', {
-      params: { page },
+      params,
     });
     return response.data;
   },

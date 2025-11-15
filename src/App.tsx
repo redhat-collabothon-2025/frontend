@@ -9,6 +9,7 @@ import EmployeeDetail from '@/pages/EmployeeDetail';
 import Campaigns from '@/pages/Campaigns';
 import Incidents from '@/pages/Incidents';
 import Logs from '@/pages/Logs';
+import { Toaster } from '@/components/ui/sonner';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <Toaster />
       </AuthProvider>
     </BrowserRouter>
   );

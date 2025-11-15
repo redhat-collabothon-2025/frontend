@@ -4,7 +4,8 @@ import type { Incident } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Clock, User, CheckCircle, RefreshCw, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertTriangle, Clock, User, CheckCircle, RefreshCw, Trash2, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Incidents() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -14,13 +15,15 @@ export default function Incidents() {
   const [totalCount, setTotalCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrevious, setHasPrevious] = useState(false);
+  const [severityFilter, setSeverityFilter] = useState<string>('all');
 
-  const fetchIncidents = async (page: number = 1) => {
+  const fetchIncidents = async (page: number = 1, severity: string = severityFilter) => {
     setLoading(true);
     try {
-      const response = await incidentsService.list(page);
-      setIncidents(response.results || []);
-      setTotalCount(response.count || 0);
+      const response = await incidentsService.list(page, severity);
+      const incidentsList = response.results || response || [];
+      setIncidents(incidentsList);
+      setTotalCount(response.count || incidentsList.length);
       setHasNext(!!response.next);
       setHasPrevious(!!response.previous);
       setCurrentPage(page);
@@ -35,43 +38,58 @@ export default function Incidents() {
     setResolvingId(incidentId);
     try {
       await incidentsService.resolve(incidentId);
-      await fetchIncidents(currentPage);
-      alert('Incident resolved successfully!');
+      await fetchIncidents(currentPage, severityFilter);
+      toast.success('Incident resolved successfully!');
     } catch (error) {
       console.error('Error resolving incident:', error);
-      alert('Failed to resolve incident');
+      toast.error('Failed to resolve incident');
     } finally {
       setResolvingId(null);
     }
   };
 
   const handleDelete = async (incidentId: string) => {
-    if (!confirm('Are you sure you want to delete this incident?')) return;
-
-    try {
-      await incidentsService.delete(incidentId);
-      await fetchIncidents(currentPage);
-      alert('Incident deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting incident:', error);
-      alert('Failed to delete incident');
-    }
+    toast('Are you sure you want to delete this incident?', {
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            await incidentsService.delete(incidentId);
+            await fetchIncidents(currentPage, severityFilter);
+            toast.success('Incident deleted successfully!');
+          } catch (error) {
+            console.error('Error deleting incident:', error);
+            toast.error('Failed to delete incident');
+          }
+        },
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {},
+      },
+    });
   };
 
   const handleNextPage = () => {
     if (hasNext) {
-      fetchIncidents(currentPage + 1);
+      fetchIncidents(currentPage + 1, severityFilter);
     }
   };
 
   const handlePreviousPage = () => {
     if (hasPrevious) {
-      fetchIncidents(currentPage - 1);
+      fetchIncidents(currentPage - 1, severityFilter);
     }
   };
 
+  const handleSeverityFilterChange = (newSeverity: string) => {
+    setSeverityFilter(newSeverity);
+    // Reset to page 1 when changing filter
+    fetchIncidents(1, newSeverity);
+  };
+
   useEffect(() => {
-    fetchIncidents(1);
+    fetchIncidents(1, severityFilter);
   }, []);
 
   const getSeverityBadgeVariant = (severity: string) => {
@@ -107,12 +125,50 @@ export default function Incidents() {
           </p>
         </div>
         <Button
-          onClick={() => fetchIncidents(currentPage)}
+          onClick={() => fetchIncidents(currentPage, severityFilter)}
           variant="outline"
           className="gap-2"
         >
           <RefreshCw className="h-4 w-4" />
           Refresh
+        </Button>
+      </div>
+
+      {/* Filter Buttons */}
+      <div className="flex items-center gap-2">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm text-muted-foreground mr-2">Filter by severity:</span>
+        <Button
+          onClick={() => handleSeverityFilterChange('all')}
+          variant={severityFilter === 'all' ? 'default' : 'outline'}
+          size="sm"
+          className="gap-2"
+        >
+          All
+        </Button>
+        <Button
+          onClick={() => handleSeverityFilterChange('CRITICAL')}
+          variant={severityFilter === 'CRITICAL' ? 'default' : 'outline'}
+          size="sm"
+          className={`gap-2 ${severityFilter === 'CRITICAL' ? 'bg-red-500 hover:bg-red-600 border-red-600' : ''}`}
+        >
+          Critical
+        </Button>
+        <Button
+          onClick={() => handleSeverityFilterChange('MEDIUM')}
+          variant={severityFilter === 'MEDIUM' ? 'default' : 'outline'}
+          size="sm"
+          className={`gap-2 ${severityFilter === 'MEDIUM' ? 'bg-yellow-500 hover:bg-yellow-600 border-yellow-600 text-black' : ''}`}
+        >
+          Medium
+        </Button>
+        <Button
+          onClick={() => handleSeverityFilterChange('LOW')}
+          variant={severityFilter === 'LOW' ? 'default' : 'outline'}
+          size="sm"
+          className="gap-2"
+        >
+          Low
         </Button>
       </div>
 
@@ -182,7 +238,11 @@ export default function Incidents() {
       {totalCount > 0 && (
         <div className="flex items-center justify-between border-t border-border pt-4">
           <div className="text-sm text-muted-foreground">
-            Page {currentPage} • Showing {incidents.length} of {totalCount} incidents
+            {severityFilter !== 'all' ? (
+              `Showing ${incidents.length} ${severityFilter} incidents`
+            ) : (
+              `Page ${currentPage} • Showing ${incidents.length} of ${totalCount} incidents`
+            )}
           </div>
           <div className="flex gap-2">
             <Button
@@ -215,8 +275,12 @@ export default function Incidents() {
             <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-muted-foreground">No incidents found</p>
-            <p className="text-sm text-muted-foreground/60 mt-1">All systems running smoothly</p>
+            <p className="text-muted-foreground">
+              {severityFilter === 'all' ? 'No incidents found' : `No ${severityFilter} incidents found`}
+            </p>
+            <p className="text-sm text-muted-foreground/60 mt-1">
+              {severityFilter === 'all' ? 'All systems running smoothly' : 'Try selecting a different severity level'}
+            </p>
           </CardContent>
         </Card>
       )}

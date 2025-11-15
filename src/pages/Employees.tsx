@@ -8,29 +8,37 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Search, Users, RefreshCw, Mail, CheckSquare, Square, Plus } from 'lucide-react';
+import { Search, Users, RefreshCw, Mail, CheckSquare, Square, Plus, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Employees() {
   const [employees, setEmployees] = useState<User[]>([]);
-  const [filteredEmployees, setFilteredEmployees] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [riskFilter, setRiskFilter] = useState<string>('all');
   const [recalculating, setRecalculating] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<Set<string>>(new Set());
   const [sendingBulk, setSendingBulk] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
   });
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = async (page: number = 1, search: string = searchTerm, risk: string = riskFilter) => {
     setLoading(true);
     try {
-      const response = await employeesService.list();
+      const response = await employeesService.list(page, search, risk);
       const employeesList = response.results || [];
       setEmployees(employeesList);
-      setFilteredEmployees(employeesList);
+      setTotalCount(response.count || 0);
+      setHasNext(!!response.next);
+      setHasPrevious(!!response.previous);
+      setCurrentPage(page);
     } catch (error) {
       console.error('Error fetching employees:', error);
     } finally {
@@ -42,11 +50,11 @@ export default function Employees() {
     setRecalculating(true);
     try {
       await employeesService.recalculate();
-      await fetchEmployees();
-      alert('Risk scores recalculated successfully!');
+      await fetchEmployees(currentPage, searchTerm, riskFilter);
+      toast.success('Risk scores recalculated successfully!');
     } catch (error) {
       console.error('Error recalculating risk scores:', error);
-      alert('Failed to recalculate risk scores');
+      toast.error('Failed to recalculate risk scores');
     } finally {
       setRecalculating(false);
     }
@@ -63,16 +71,16 @@ export default function Employees() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedEmployees.size === filteredEmployees.length) {
+    if (selectedEmployees.size === employees.length) {
       setSelectedEmployees(new Set());
     } else {
-      setSelectedEmployees(new Set(filteredEmployees.map(emp => emp.id)));
+      setSelectedEmployees(new Set(employees.map(emp => emp.id)));
     }
   };
 
   const handleBulkPhishing = async () => {
     if (selectedEmployees.size === 0) {
-      alert('Please select at least one employee');
+      toast.warning('Please select at least one employee');
       return;
     }
 
@@ -82,11 +90,11 @@ export default function Employees() {
         user_ids: Array.from(selectedEmployees),
         template_type: 'linkedin',
       });
-      alert(`Phishing emails sent!\nSent: ${response.sent_count}\nFailed: ${response.failed_count}`);
+      toast.success(`Phishing emails sent! Sent: ${response.sent_count}, Failed: ${response.failed_count}`);
       setSelectedEmployees(new Set());
     } catch (error) {
       console.error('Error sending bulk phishing:', error);
-      alert('Failed to send bulk phishing emails');
+      toast.error('Failed to send bulk phishing emails');
     } finally {
       setSendingBulk(false);
     }
@@ -94,7 +102,7 @@ export default function Employees() {
 
   const handleCreate = async () => {
     if (!formData.name || !formData.email) {
-      alert('Please fill in all fields');
+      toast.warning('Please fill in all fields');
       return;
     }
 
@@ -105,26 +113,41 @@ export default function Employees() {
       });
       setCreateOpen(false);
       setFormData({ name: '', email: '' });
-      await fetchEmployees();
-      alert('Employee created successfully!');
+      await fetchEmployees(currentPage, searchTerm, riskFilter);
+      toast.success('Employee created successfully!');
     } catch (error) {
       console.error('Error creating employee:', error);
-      alert('Failed to create employee');
+      toast.error('Failed to create employee');
     }
   };
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    fetchEmployees(1, value, riskFilter);
+  };
+
+  const handleRiskFilterChange = (newRisk: string) => {
+    setRiskFilter(newRisk);
+    setCurrentPage(1);
+    fetchEmployees(1, searchTerm, newRisk);
+  };
 
   useEffect(() => {
-    const filtered = employees.filter(
-      (emp) =>
-        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredEmployees(filtered);
-  }, [searchTerm, employees]);
+    fetchEmployees(1, searchTerm, riskFilter);
+  }, []);
+
+  const handleNextPage = () => {
+    if (hasNext) {
+      fetchEmployees(currentPage + 1, searchTerm, riskFilter);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (hasPrevious) {
+      fetchEmployees(currentPage - 1, searchTerm, riskFilter);
+    }
+  };
 
   const getRiskBadgeVariant = (level: string) => {
     switch (level) {
@@ -181,7 +204,7 @@ export default function Employees() {
             variant="outline"
             className="gap-2"
           >
-            {selectedEmployees.size === filteredEmployees.length && filteredEmployees.length > 0 ? (
+            {selectedEmployees.size === employees.length && employees.length > 0 ? (
               <CheckSquare className="h-4 w-4" />
             ) : (
               <Square className="h-4 w-4" />
@@ -189,7 +212,7 @@ export default function Employees() {
             <span className="hidden sm:inline">Select All</span>
           </Button>
           <Button
-            onClick={fetchEmployees}
+            onClick={() => fetchEmployees(currentPage, searchTerm, riskFilter)}
             variant="outline"
             className="gap-2"
           >
@@ -214,15 +237,53 @@ export default function Employees() {
             <Input
               placeholder="Search employees by name or email..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="pl-10 h-11 bg-background border-border"
             />
           </div>
         </CardHeader>
       </Card>
 
+      {/* Risk Level Filter Buttons */}
+      <div className="flex items-center gap-2">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm text-muted-foreground mr-2">Filter by risk:</span>
+        <Button
+          onClick={() => handleRiskFilterChange('all')}
+          variant={riskFilter === 'all' ? 'default' : 'outline'}
+          size="sm"
+          className="gap-2"
+        >
+          All
+        </Button>
+        <Button
+          onClick={() => handleRiskFilterChange('CRITICAL')}
+          variant={riskFilter === 'CRITICAL' ? 'default' : 'outline'}
+          size="sm"
+          className={`gap-2 ${riskFilter === 'CRITICAL' ? 'bg-red-500 hover:bg-red-600 border-red-600' : ''}`}
+        >
+          Critical
+        </Button>
+        <Button
+          onClick={() => handleRiskFilterChange('MEDIUM')}
+          variant={riskFilter === 'MEDIUM' ? 'default' : 'outline'}
+          size="sm"
+          className={`gap-2 ${riskFilter === 'MEDIUM' ? 'bg-yellow-500 hover:bg-yellow-600 border-yellow-600 text-black' : ''}`}
+        >
+          Medium
+        </Button>
+        <Button
+          onClick={() => handleRiskFilterChange('LOW')}
+          variant={riskFilter === 'LOW' ? 'default' : 'outline'}
+          size="sm"
+          className="gap-2"
+        >
+          Low
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 gap-4">
-        {filteredEmployees.map((employee) => (
+        {employees.map((employee) => (
           <Card
             key={employee.id}
             className={`border-border bg-card hover:shadow-xl hover:border-white transition-all cursor-pointer group ${
@@ -250,7 +311,14 @@ export default function Employees() {
                       <h3 className="text-lg font-semibold text-white group-hover:text-gray-300 transition-colors">
                         {employee.name}
                       </h3>
-                      <Badge variant={getRiskBadgeVariant(employee.risk_level)} className="shadow-sm">
+                      <Badge
+                        variant={getRiskBadgeVariant(employee.risk_level)}
+                        className={`shadow-sm ${
+                          employee.risk_level === 'CRITICAL' ? 'bg-red-500/90 hover:bg-red-500 border-red-600' :
+                          employee.risk_level === 'MEDIUM' ? 'bg-yellow-500/90 hover:bg-yellow-500 border-yellow-600 text-black' :
+                          ''
+                        }`}
+                      >
                         {employee.risk_level}
                       </Badge>
                     </div>
@@ -269,7 +337,39 @@ export default function Employees() {
         ))}
       </div>
 
-      {filteredEmployees.length === 0 && (
+      {/* Pagination Controls */}
+      {totalCount > 0 && (
+        <div className="flex items-center justify-between border-t border-border pt-4">
+          <div className="text-sm text-muted-foreground">
+            Page {currentPage} • Showing {employees.length} of {totalCount} employees
+            {(searchTerm || riskFilter !== 'all') && ' (filtered)'}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handlePreviousPage}
+              disabled={!hasPrevious}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <Button
+              onClick={handleNextPage}
+              disabled={!hasNext}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {employees.length === 0 && (
         <Card className="border-border bg-card">
           <CardContent className="p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
