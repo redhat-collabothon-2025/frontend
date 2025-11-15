@@ -7,31 +7,16 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Build frontend
-        env:
-          CI: false
-          VITE_API_URL: https://backend-white-hat-project.apps.cluster-xdhbp.xdhbp.sandbox1403.opentlc.com
-        run: npm run build
-      
+
       - name: Install oc CLI
         uses: redhat-actions/oc-installer@v1
         with:
-          version: '4.12'
-      
+          version: "4.12"
+
       - name: Login to OpenShift
         uses: redhat-actions/oc-login@v1
         with:
@@ -39,17 +24,22 @@ jobs:
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           namespace: white-hat-project
           insecure_skip_tls_verify: true
-      
-      - name: Deploy to OpenShift
+
+      - name: Start build in OpenShift
         run: |
-          # Создаём ConfigMap с собранными файлами
-          oc create configmap frontend-build --from-file=dist/ --dry-run=client -o yaml | oc apply -f -
-          
-          # Если используешь Deployment вместо BuildConfig:
-          oc rollout restart deployment/frontend || echo "Deployment not found"
-          oc rollout status deployment/frontend -w --timeout=5m || echo "Waiting for deployment"
-      
-      - name: Verify Deployment
+          set -euxo pipefail
+
+          oc project white-hat-project
+
+          oc start-build frontend --follow --wait
+
+      - name: Verify deployment
         run: |
+          set -euxo pipefail
+
+          oc rollout restart deployment/frontend
+
+          oc rollout status deployment/frontend -w --timeout=5m
+
           oc get pods -l app=frontend
           oc get route frontend
