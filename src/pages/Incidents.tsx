@@ -120,8 +120,8 @@ export default function Incidents() {
         {incidents.map((incident) => (
           <Card key={incident.id} className="border-border bg-card hover:shadow-lg hover:border-white/30 transition-all group">
             <CardContent className="p-3">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2.5 flex-shrink-0">
+              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
+                <div className="flex items-center gap-2.5 min-w-[400px]">
                   <AlertTriangle className={`h-5 w-5 flex-shrink-0 ${
                     incident.severity === 'CRITICAL' ? 'text-red-500' :
                     incident.severity === 'MEDIUM' ? 'text-yellow-500' :
@@ -143,7 +143,7 @@ export default function Incidents() {
                     </Badge>
                   </div>
                 </div>
-                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                <div className="flex flex-col gap-0.5">
                   <span className="flex items-center gap-1 text-sm">
                     <User className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-white font-semibold">{incident.user_name}</span>
@@ -154,7 +154,7 @@ export default function Incidents() {
                     {new Date(incident.created_at).toLocaleString()}
                   </span>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-2">
                   <Button
                     onClick={() => handleResolve(incident.id)}
                     disabled={resolvingId === incident.id}
