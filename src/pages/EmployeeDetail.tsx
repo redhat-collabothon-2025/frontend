@@ -1,41 +1,77 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import api from '@/lib/api';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { employeesService, phishingService } from '@/services';
+import type { EmployeeDetail as EmployeeDetailType, RiskHistory } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Mail, Calendar, TrendingUp } from 'lucide-react';
-
-interface EmployeeDetail {
-  id: string;
-  email: string;
-  name: string;
-  risk_score: number;
-  risk_level: string;
-  created_at: string;
-  incident_count: number;
-  last_incident: string | null;
-}
+import { ArrowLeft, Mail, Calendar, TrendingUp, Send, History, Trash2 } from 'lucide-react';
 
 export default function EmployeeDetail() {
   const { id } = useParams<{ id: string }>();
-  const [employee, setEmployee] = useState<EmployeeDetail | null>(null);
+  const navigate = useNavigate();
+  const [employee, setEmployee] = useState<EmployeeDetailType | null>(null);
+  const [riskHistory, setRiskHistory] = useState<RiskHistory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sendingPhishing, setSendingPhishing] = useState(false);
+
+  const fetchEmployee = async () => {
+    try {
+      const data = await employeesService.get(id!);
+      setEmployee(data);
+    } catch (error) {
+      console.error('Error fetching employee:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRiskHistory = async () => {
+    try {
+      const response = await employeesService.getHistory(id!);
+      setRiskHistory(response.results || []);
+    } catch (error) {
+      console.error('Error fetching risk history:', error);
+    }
+  };
+
+  const handleSendPhishing = async () => {
+    if (!id) return;
+
+    setSendingPhishing(true);
+    try {
+      const response = await phishingService.send({
+        user_id: id,
+        template_type: 'linkedin',
+        tracking_enabled: true,
+      });
+      alert(`Phishing email sent successfully! Tracking ID: ${response.tracking_id}`);
+    } catch (error) {
+      console.error('Error sending phishing email:', error);
+      alert('Failed to send phishing email');
+    } finally {
+      setSendingPhishing(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    if (!confirm('Are you sure you want to delete this employee? This action cannot be undone.')) return;
+
+    try {
+      await employeesService.delete(id);
+      alert('Employee deleted successfully!');
+      navigate('/employees');
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+      alert('Failed to delete employee');
+    }
+  };
 
   useEffect(() => {
-    const fetchEmployee = async () => {
-      try {
-        const response = await api.get(`/api/employees/${id}/`);
-        setEmployee(response.data);
-      } catch (error) {
-        console.error('Error fetching employee:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (id) {
       fetchEmployee();
+      fetchRiskHistory();
     }
   }, [id]);
 
@@ -87,9 +123,27 @@ export default function EmployeeDetail() {
             {employee.email}
           </p>
         </div>
-        <Badge variant={getRiskBadgeVariant(employee.risk_level)} className="text-lg px-4 py-2">
-          {employee.risk_level}
-        </Badge>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button
+            onClick={handleSendPhishing}
+            disabled={sendingPhishing}
+            className="gap-2"
+          >
+            <Send className="h-4 w-4" />
+            <span className="hidden sm:inline">{sendingPhishing ? 'Sending...' : 'Send Phishing Test'}</span>
+          </Button>
+          <Button
+            onClick={handleDelete}
+            variant="destructive"
+            className="gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Delete</span>
+          </Button>
+          <Badge variant={getRiskBadgeVariant(employee.risk_level)} className="text-lg px-4 py-2">
+            {employee.risk_level}
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -170,6 +224,36 @@ export default function EmployeeDetail() {
               </dd>
             </div>
           </dl>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <History className="h-5 w-5" />
+            Risk Score History
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {riskHistory.length > 0 ? (
+            <div className="space-y-3">
+              {riskHistory.map((record) => (
+                <div key={record.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">
+                      Risk Score: {record.risk_score.toFixed(1)}
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1">{record.reason}</p>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {new Date(record.created_at).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-8">No risk history available</p>
+          )}
         </CardContent>
       </Card>
     </div>
