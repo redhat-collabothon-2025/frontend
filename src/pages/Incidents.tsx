@@ -120,29 +120,27 @@ export default function Incidents() {
         {incidents.map((incident) => (
           <Card key={incident.id} className="border-border bg-card hover:shadow-lg hover:border-white/30 transition-all group">
             <CardContent className="p-3">
-              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-                <div className="flex items-center gap-2.5 min-w-[400px]">
+              <div className="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-4">
+                <div className="flex items-center gap-2.5">
                   <AlertTriangle className={`h-5 w-5 flex-shrink-0 ${
                     incident.severity === 'CRITICAL' ? 'text-red-500' :
                     incident.severity === 'MEDIUM' ? 'text-yellow-500' :
                     'text-white'
                   }`} />
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-semibold text-white group-hover:text-gray-300 transition-colors whitespace-nowrap">
-                      {incident.incident_type}
-                    </h3>
-                    <Badge
-                      variant={getSeverityBadgeVariant(incident.severity)}
-                      className={`text-xs font-medium ${
-                        incident.severity === 'CRITICAL' ? 'bg-red-500/90 hover:bg-red-500 border-red-600' :
-                        incident.severity === 'MEDIUM' ? 'bg-yellow-500/90 hover:bg-yellow-500 border-yellow-600 text-black' :
-                        ''
-                      }`}
-                    >
-                      {incident.severity}
-                    </Badge>
-                  </div>
+                  <h3 className="text-sm font-semibold text-white group-hover:text-gray-300 transition-colors whitespace-nowrap">
+                    {incident.incident_type}
+                  </h3>
                 </div>
+                <Badge
+                  variant={getSeverityBadgeVariant(incident.severity)}
+                  className={`text-xs font-medium ${
+                    incident.severity === 'CRITICAL' ? 'bg-red-500/90 hover:bg-red-500 border-red-600' :
+                    incident.severity === 'MEDIUM' ? 'bg-yellow-500/90 hover:bg-yellow-500 border-yellow-600 text-black' :
+                    ''
+                  }`}
+                >
+                  {incident.severity}
+                </Badge>
                 <div className="flex flex-col gap-0.5">
                   <span className="flex items-center gap-1 text-sm">
                     <User className="h-3.5 w-3.5 text-muted-foreground" />
