@@ -1,26 +1,56 @@
 import { useEffect, useState } from 'react';
-import api from '@/lib/api';
+import { incidentsService } from '@/services';
 import type { Incident } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Clock, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, Clock, User, CheckCircle, RefreshCw, Trash2 } from 'lucide-react';
 
 export default function Incidents() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+
+  const fetchIncidents = async () => {
+    setLoading(true);
+    try {
+      const response = await incidentsService.list();
+      setIncidents(response.results || []);
+    } catch (error) {
+      console.error('Error fetching incidents:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResolve = async (incidentId: string) => {
+    setResolvingId(incidentId);
+    try {
+      await incidentsService.resolve(incidentId);
+      await fetchIncidents();
+      alert('Incident resolved successfully!');
+    } catch (error) {
+      console.error('Error resolving incident:', error);
+      alert('Failed to resolve incident');
+    } finally {
+      setResolvingId(null);
+    }
+  };
+
+  const handleDelete = async (incidentId: string) => {
+    if (!confirm('Are you sure you want to delete this incident?')) return;
+
+    try {
+      await incidentsService.delete(incidentId);
+      await fetchIncidents();
+      alert('Incident deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting incident:', error);
+      alert('Failed to delete incident');
+    }
+  };
 
   useEffect(() => {
-    const fetchIncidents = async () => {
-      try {
-        const response = await api.get('/api/incidents/');
-        setIncidents(response.data.results || response.data);
-      } catch (error) {
-        console.error('Error fetching incidents:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchIncidents();
   }, []);
 
@@ -54,6 +84,14 @@ export default function Incidents() {
           </h1>
           <p className="text-muted-foreground mt-2">Security incidents and events monitoring</p>
         </div>
+        <Button
+          onClick={fetchIncidents}
+          variant="outline"
+          className="gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Refresh
+        </Button>
       </div>
 
       <div className="space-y-4">
@@ -96,6 +134,26 @@ export default function Incidents() {
                       </div>
                     </div>
                   </div>
+                </div>
+                <div className="ml-auto pl-4 flex gap-2">
+                  <Button
+                    onClick={() => handleResolve(incident.id)}
+                    disabled={resolvingId === incident.id}
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    {resolvingId === incident.id ? 'Resolving...' : 'Resolve'}
+                  </Button>
+                  <Button
+                    onClick={() => handleDelete(incident.id)}
+                    size="sm"
+                    variant="destructive"
+                    className="gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Delete</span>
+                  </Button>
                 </div>
               </div>
             </CardContent>

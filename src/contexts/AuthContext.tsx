@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import api from "@/lib/api";
+import { authService } from "@/services";
 import type { User } from "@/types";
 
 interface AuthContextType {
@@ -23,8 +23,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const token = localStorage.getItem("access_token");
       if (token) {
         try {
-          const response = await api.get("/api/auth/me/");
-          setUser(response.data);
+          const userData = await authService.getCurrentUser();
+          setUser(userData);
         } catch (error) {
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
@@ -37,8 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await api.post("/api/auth/login/", { email, password });
-    const { access, refresh, user } = response.data;
+    const response = await authService.login({ email, password });
+    const { access, refresh, user } = response;
 
     localStorage.setItem("access_token", access);
     localStorage.setItem("refresh_token", refresh);
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const refreshToken = localStorage.getItem("refresh_token");
     try {
       if (refreshToken) {
-        await api.post("/api/auth/logout/", { refresh: refreshToken });
+        await authService.logout(refreshToken);
       }
     } catch (error) {
       console.error("Logout error:", error);

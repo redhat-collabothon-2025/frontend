@@ -8,6 +8,7 @@ import Employees from '@/pages/Employees';
 import EmployeeDetail from '@/pages/EmployeeDetail';
 import Campaigns from '@/pages/Campaigns';
 import Incidents from '@/pages/Incidents';
+import Events from '@/pages/Events';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="employees/:id" element={<EmployeeDetail />} />
             <Route path="campaigns" element={<Campaigns />} />
             <Route path="incidents" element={<Incidents />} />
+            <Route path="events" element={<Events />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
