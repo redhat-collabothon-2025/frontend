@@ -10,6 +10,7 @@ import Campaigns from '@/pages/Campaigns';
 import Incidents from '@/pages/Incidents';
 import Logs from '@/pages/Logs';
 import Agents from '@/pages/Agents';
+import Profile from '@/pages/Profile';
 import { Toaster } from '@/components/ui/sonner';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
             <Route path="incidents" element={<Incidents />} />
             <Route path="logs" element={<Logs />} />
             <Route path="agents" element={<Agents />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
