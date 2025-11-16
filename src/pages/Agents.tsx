@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { agentsService } from '@/services';
 import type { Agent, AgentStatistics } from '@/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Cpu, RefreshCw, Filter, Activity, HardDrive, Wifi } from 'lucide-react';
+import { Search, Cpu, RefreshCw, Filter, Activity, HardDrive, Wifi, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { ListSkeleton } from '@/components/LoadingStates';
 
 export default function Agents() {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -119,11 +121,7 @@ export default function Agents() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading...</div>
-      </div>
-    );
+    return <ListSkeleton count={6} />;
   }
 
   return (
@@ -256,12 +254,10 @@ export default function Agents() {
       {/* Agents List */}
       <div className="grid grid-cols-1 gap-4">
         {filteredAgents.map((agent) => (
-          <Card
-            key={agent.agent_id}
-            className="border-border bg-card hover:shadow-xl hover:border-white transition-all group"
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
+          <Link key={agent.agent_id} to={`/agents/${agent.agent_id}`}>
+            <Card className="border-border bg-card hover:shadow-xl hover:border-white transition-all group cursor-pointer">
+              <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
                     <h3 className="text-lg font-semibold text-white group-hover:text-gray-300 transition-colors">
@@ -322,9 +318,15 @@ export default function Agents() {
                     </p>
                   </div>
                 </div>
+
+                {/* Arrow Icon */}
+                <div className="flex items-center">
+                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-white transition-colors" />
+                </div>
               </div>
             </CardContent>
           </Card>
+          </Link>
         ))}
       </div>
 
