@@ -8,6 +8,7 @@ import {
   LogOut,
   BarChart3,
   FileText,
+  Cpu,
 } from "lucide-react";
 
 export default function Layout() {
@@ -97,6 +98,17 @@ export default function Layout() {
               >
                 <FileText className="h-4 w-4 md:mr-2" />
                 <span className="hidden md:inline">Logs</span>
+              </Link>
+              <Link
+                to="/agents"
+                className={`${
+                  isActive("/agents")
+                    ? "bg-white text-black"
+                    : "text-muted-foreground hover:text-white hover:bg-white/10"
+                } inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200`}
+              >
+                <Cpu className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Agents</span>
               </Link>
             </div>
 

@@ -8,3 +8,4 @@ export { logsService } from './logs';
 export { phishingService } from './phishing';
 export { risksService } from './risks';
 export { usersService } from './users';
+export { agentsService } from './agents';

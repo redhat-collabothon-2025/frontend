@@ -195,6 +195,60 @@ export interface Log {
   created_at: string;
 }
 
+// Agent Types
+export type AgentStatus = 'online' | 'offline' | 'suspicious';
+export type UploadStatus = 'pending' | 'completed' | 'failed';
+
+export interface Agent {
+  agent_id: string;
+  user: string;
+  user_email: string;
+  user_name: string;
+  user_risk_level: Severity;
+  hostname: string;
+  os_type: string;
+  ip_address: string;
+  status: AgentStatus;
+  last_heartbeat: string;
+  created_at: string;
+}
+
+export interface AgentDetail extends Agent {
+  recent_uploads?: FileUpload[];
+  recent_events?: OfflineEvent[];
+}
+
+export interface AgentStatistics {
+  total_agents: number;
+  online_agents: number;
+  offline_agents: number;
+  suspicious_agents: number;
+  total_uploads: number;
+  pending_uploads: number;
+  completed_uploads: number;
+  failed_uploads: number;
+}
+
+export interface FileUpload {
+  upload_id: string;
+  agent_id: string;
+  file_path: string;
+  file_size: number;
+  upload_status: UploadStatus;
+  upload_started: string;
+  upload_completed: string | null;
+  error_message: string | null;
+}
+
+export interface OfflineEvent {
+  event_id: string;
+  agent_id: string;
+  event_type: string;
+  event_data: Record<string, any>;
+  event_timestamp: string;
+  synced_at: string | null;
+}
+
 // Pagination Types
 export interface PaginatedResponse<T> {
   count: number;

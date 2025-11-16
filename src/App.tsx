@@ -9,6 +9,7 @@ import EmployeeDetail from '@/pages/EmployeeDetail';
 import Campaigns from '@/pages/Campaigns';
 import Incidents from '@/pages/Incidents';
 import Logs from '@/pages/Logs';
+import Agents from '@/pages/Agents';
 import { Toaster } from '@/components/ui/sonner';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="campaigns" element={<Campaigns />} />
             <Route path="incidents" element={<Incidents />} />
             <Route path="logs" element={<Logs />} />
+            <Route path="agents" element={<Agents />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
