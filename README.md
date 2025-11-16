@@ -1,4 +1,5 @@
-# Cerberus - Security Awareness Training Platform
+# White Hat team
+# Cerberus project
 
 A modern frontend application for security awareness training and phishing simulation management.
 
