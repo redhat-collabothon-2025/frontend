@@ -1,4 +1,4 @@
-# SecureAware - Security Awareness Training Platform
+# Cerberus - Security Awareness Training Platform
 
 A modern frontend application for security awareness training and phishing simulation management.
 
