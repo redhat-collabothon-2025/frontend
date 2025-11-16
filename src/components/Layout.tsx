@@ -1,7 +1,14 @@
-import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Users, AlertTriangle, Target, LogOut, BarChart3, FileText } from 'lucide-react';
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import {
+  Users,
+  AlertTriangle,
+  Target,
+  LogOut,
+  BarChart3,
+  FileText,
+} from "lucide-react";
 
 export default function Layout() {
   const { logout } = useAuth();
@@ -10,7 +17,7 @@ export default function Layout() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -22,14 +29,15 @@ export default function Layout() {
           <div className="flex items-center justify-between h-16">
             {/* Logo - White Hat */}
             <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10 flex items-center justify-center transform hover:scale-110 transition-transform">
-                {/* Hat brim */}
-                <div className="absolute bottom-2 w-10 h-2 bg-white rounded-full"></div>
-                {/* Hat crown */}
-                <div className="absolute top-1 w-6 h-6 bg-white rounded-t-full"></div>
-              </div>
               <span className="text-xl font-bold text-white hidden md:inline">
-                WhiteHat
+                <img
+                  src="/white-hat.png"
+                  alt="White Hat"
+                  width={120}
+                  height={120}
+                  className="inline-block w-12 h-12 mr-2"
+                />
+                Cerberus
               </span>
             </div>
 
@@ -38,9 +46,9 @@ export default function Layout() {
               <Link
                 to="/"
                 className={`${
-                  isActive('/')
-                    ? 'bg-white text-black'
-                    : 'text-muted-foreground hover:text-white hover:bg-white/10'
+                  isActive("/")
+                    ? "bg-white text-black"
+                    : "text-muted-foreground hover:text-white hover:bg-white/10"
                 } inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200`}
               >
                 <BarChart3 className="h-4 w-4 md:mr-2" />
@@ -49,9 +57,9 @@ export default function Layout() {
               <Link
                 to="/employees"
                 className={`${
-                  isActive('/employees')
-                    ? 'bg-white text-black'
-                    : 'text-muted-foreground hover:text-white hover:bg-white/10'
+                  isActive("/employees")
+                    ? "bg-white text-black"
+                    : "text-muted-foreground hover:text-white hover:bg-white/10"
                 } inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200`}
               >
                 <Users className="h-4 w-4 md:mr-2" />
@@ -60,9 +68,9 @@ export default function Layout() {
               <Link
                 to="/campaigns"
                 className={`${
-                  isActive('/campaigns')
-                    ? 'bg-white text-black'
-                    : 'text-muted-foreground hover:text-white hover:bg-white/10'
+                  isActive("/campaigns")
+                    ? "bg-white text-black"
+                    : "text-muted-foreground hover:text-white hover:bg-white/10"
                 } inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200`}
               >
                 <Target className="h-4 w-4 md:mr-2" />
@@ -71,9 +79,9 @@ export default function Layout() {
               <Link
                 to="/incidents"
                 className={`${
-                  isActive('/incidents')
-                    ? 'bg-white text-black'
-                    : 'text-muted-foreground hover:text-white hover:bg-white/10'
+                  isActive("/incidents")
+                    ? "bg-white text-black"
+                    : "text-muted-foreground hover:text-white hover:bg-white/10"
                 } inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200`}
               >
                 <AlertTriangle className="h-4 w-4 md:mr-2" />
@@ -82,9 +90,9 @@ export default function Layout() {
               <Link
                 to="/logs"
                 className={`${
-                  isActive('/logs')
-                    ? 'bg-white text-black'
-                    : 'text-muted-foreground hover:text-white hover:bg-white/10'
+                  isActive("/logs")
+                    ? "bg-white text-black"
+                    : "text-muted-foreground hover:text-white hover:bg-white/10"
                 } inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200`}
               >
                 <FileText className="h-4 w-4 md:mr-2" />
@@ -115,4 +123,3 @@ export default function Layout() {
     </div>
   );
 }
-
