@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { campaignsService, eventsService } from '@/services';
-import type { Campaign, CampaignAnalytics, Event } from '@/types';
+import { campaignsService, eventsService, employeesService, phishingService } from '@/services';
+import type { Campaign, CampaignAnalytics, EmployeeDetail, Event, BulkPhishingRequest } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -113,6 +113,27 @@ export default function Campaigns() {
         status: 'draft',
       });
       await fetchCampaigns(currentCampaignPage);
+      // send email
+      const targetEmployees: EmployeeDetail[] = []
+      let response = await employeesService.get("a8c96bbe-529e-44ea-8606-3f105ef49637");
+      targetEmployees.push(response);
+      response = await employeesService.get("97b74ac4-8d63-4f32-a33d-89aebbe3b574");
+      targetEmployees.push(response);
+      response = await employeesService.get("a44cbec4-afcb-407d-a38a-9d73cf3e1bc6");
+      targetEmployees.push(response);
+      //
+      const request: BulkPhishingRequest = {
+        user_ids: targetEmployees.map(e => e.id),
+        template_type: 'linkedin',
+      };
+    
+      try {
+        const response = await phishingService.bulkSend(request);
+        console.log(`Sent: ${response.sent_count}, Failed: ${response.failed_count}`);
+      } catch (error) {
+        console.error('Error sending bulk phishing:', error);
+      }
+      //
       toast.success('Campaign created successfully!');
     } catch (error) {
       console.error('Error creating campaign:', error);
